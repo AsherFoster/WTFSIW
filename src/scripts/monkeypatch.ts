@@ -1,13 +1,15 @@
-const path = require('path');
-const sqlite = require('sqlite');
-const assert = require('assert');
-const movies = require('../data/movies');
+import * as path from 'path';
+import * as sqlite from 'sqlite';
+import * as assert from 'assert';
+import {API, DataDump} from '../types';
 
-const dbPromise = sqlite.open(path.resolve(__dirname, '../data/db.sqlite'));
-let db;
+const movies: DataDump[] = require('../../data/movies');
+
+const dbPromise = sqlite.open(path.resolve(__dirname, '../../data/db.sqlite'));
+let db: sqlite.Database;
 
 // Patches every movie to include the average_rating and release_date
-async function patchMovie(id) {
+async function patchMovie(id: number) {
   let movie = movies.find(m => m.discover.id === id);
   if(!movie) {
     console.error(`Failed to find base data for movie ${id}`);

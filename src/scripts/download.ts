@@ -2,18 +2,22 @@ const CONFIG = {
   importCount: 1000, // Download and import this many movies
   apiKey: process.env.TMDB_API_KEY,
   apiBase: 'https://api.themoviedb.org/3',
-  outputFile: 'movies.json'
+  outputFile: 'movies.json',
+  genresFile: 'genres.json'
 };
 
-const https = require('https');
-const fs = require('fs');
-const Bottleneck = require('bottleneck/bottleneck');
+import * as https from 'https';
+import * as http from 'http';
+import * as fs from 'fs';
+import Bottleneck from 'bottleneck';
+import {API, DataDump} from '../types';
 
 async function main() {
-  let {initialPagination, movies} = await getDiscoverPage(1);
+  let {movies} = await getDiscoverPage(1);
+  let genres = await getGenres();
   let page = 2;
   while (movies.length < CONFIG.importCount) {
-    let {pagination, movies: newMovies} = await getDiscoverPage(page);
+    let {movies: newMovies} = await getDiscoverPage(page);
     movies = movies.concat(newMovies);
     console.log(`Page ${page}. ${movies.length} movies so far`);
     page++;
@@ -22,13 +26,19 @@ async function main() {
   console.log('Finishing here for some reason?');
 
   fs.writeFileSync(CONFIG.outputFile, JSON.stringify(movies));
+  fs.writeFileSync(CONFIG.genresFile, JSON.stringify(genres));
 }
-async function getDiscoverPage(page) {
+async function getDiscoverPage(page: number) {
   const resp = await apiGet(`/discover/movie`, {
     sort_by: 'popularity.desc',
     page
-  });
-  let movies = [];
+  }) as {
+    page: number,
+    total_results: number,
+    total_pages: number,
+    results: API.DiscoverMovie[]
+  };
+  let movies: DataDump[] = [];
   if(!resp.results) {
     console.error(resp);
   }
@@ -49,19 +59,21 @@ async function getDiscoverPage(page) {
   };
 }
 
-async function getMovieDetails(id) {
-  const {cast, crew} = await apiGet(`/movie/${id}/credits`);
+async function getMovieDetails(id: number) {
+  // @ts-ignore
+  const {cast, crew} = await apiGet(`/movie/${id}/credits`) as {cast: API.Cast, crew: API.Crew};
   return {cast, crew}
 }
 async function getGenres() {
-  return (await get('/genre/movie/list')).genres;
+  // @ts-ignore
+  return (await apiGet('/genre/movie/list')).genres;
 }
 
 /* Simplifies querying the API. Formats the URL and parses the response */
-function _apiGet(method, params = {}) {
-  return new Promise(async (resolve, reject) => {
+function _apiGet(method: string, params = {}) {
+  return new Promise(async (resolve) => {
     const url = makeUrl(method, params);
-    https.get(url, res => {
+    https.get(url, (res: http.IncomingMessage) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -80,7 +92,7 @@ const limiter = new Bottleneck({
 });
 const apiGet = limiter.wrap(_apiGet);
 
-function makeUrl(method, params) {
+function makeUrl(method: string, params: {[propKey: string]: any}) {
   params.api_key = CONFIG.apiKey;
   // Handy one liner from https://stackoverflow.com/a/23639793
   const serializedParams = '?' + Object.entries(params).map(([key, val]) => `${key}=${val}`).join('&');

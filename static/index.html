@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>What the Fuck Should I watch?!</title>
+  <title>What the Fuck Should I Watch?!</title>
   <link href="https://fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
   <!--  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -147,7 +147,7 @@
     let app = new Vue({
       el: '#app',
       data: {
-        title: conditionalFilter(titles[Math.floor(Math.random() * titles.length)]),
+        title: conditionalFilter(pickRandom(titles)),
         movie: null,
         poster: false,
         deviceError: !(
@@ -210,7 +210,7 @@
         makeActionText({type, name, direction, role}) {
           let filterTypes = direction === 1 ? filters.positive : filters.negative;
           let texts = filterTypes[type].concat(filterTypes.generic);
-          let template = texts[Math.floor(Math.random() * texts.length)];
+          let template = pickRandom(texts);
           template = conditionalFilter(template);
 
           if (role) {
@@ -233,6 +233,9 @@
 
     function conditionalFilter(text) {
       return text.replace(/fuck/gi, FUCK);
+    }
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)]
     }
     function loadPreferences() {
       try {

@@ -20,6 +20,7 @@
   "homepage": "https://github.com/asherfoster/wftsiw#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "bottleneck": "^2.18.1",
     "cors": "^2.8.5",
     "express": "^4.17.0",
     "sqlite": "^3.0.3"

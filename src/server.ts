@@ -16,41 +16,13 @@ import * as express from 'express';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 
+import {Database} from './types';
+
 const app = express();
 const dbPromise = sqlite.open(path.resolve(__dirname, '../data/db.sqlite'));
 let db: sqlite.Database;
 let GENRE_NAMES = new Map<number, string>();
 
-namespace Database {
-  export type Movie = {
-    movie_id: number,
-    title: string,
-    overview: string,
-    poster_url: string|null,
-    release_date: string,
-    average_rating: number
-  }
-  export type Genre = {
-    genre_id: number,
-    name: string
-  }
-  export type GenreLink = {
-    genre_id: number,
-    movie_id: number
-  }
-  export type CreditType = 'cast'|'crew';
-  export type Credit = {
-    credit_id: string,
-    person_id: number,
-    movie_id: number,
-    credit_type: CreditType,
-    job: string
-  }
-  export type Person = {
-    person_id: number,
-    name: string
-  }
-}
 type BasicCredit = {
   credit_id: string,
   person_id: number,

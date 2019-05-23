@@ -69,8 +69,9 @@ async function importGenres() {
   assert.strictEqual(count['count(*)'], genres.length);
 }
 async function importMovie({discover: movie, cast, crew}) {
-  await db.run('INSERT INTO movies(movie_id, title, overview, poster_url) VALUES (?, ?, ?, ?)', [
-    movie.id, movie.title, movie.overview, movie.poster_path
+  let date = new Date(movie.release_date || 0);
+  await db.run('INSERT INTO movies(movie_id, title, overview, poster_url, average_rating, release_date) VALUES (?, ?, ?, ?)', [
+    movie.id, movie.title, movie.overview, movie.poster_path, movie.vote_average, date
   ]);
   if(cast)
     await Promise.all(cast.map(c => importCast(c, movie.id)));

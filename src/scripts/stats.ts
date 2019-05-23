@@ -1,4 +1,6 @@
-let movies = require('../data/movies');
+import {DataDump} from '../types';
+
+const movies: DataDump[] = require('../../data/movies');
 
 const stats = {
   maxTitleLength: 0,
