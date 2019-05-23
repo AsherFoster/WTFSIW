@@ -73,12 +73,13 @@
     <footer class="footer">
       <p class="reasoning" v-if="movie.reasonText">Suggested because you {{movie.reasonText}}</p>
       <div v-if="debug">
+        <hr class="footer-hr">
         <p>{{movie.genres.map(g => g.name).join(', ')}}</p>
-
+        <p>Released in {{1900 + movie.release_date.getYear()}}. Score: {{movie.average_rating}}</p>
+        <p><a href="#" v-if="movie.poster_url" @click="togglePoster()">Show me the {{fuck}}ing poster</a></p>
       </div>
       <hr class="footer-hr">
       <p>Made by Asher Foster using TMDb, and a {{fuck}} ton of luck</p>
-      <a href="#" v-if="movie.poster_url" @click="togglePoster()">Show me the {{fuck}}ing poster</a>
     </footer>
     <img v-if="movie.poster_url && poster" :src="movie.poster_url">
   </div>
@@ -185,6 +186,7 @@
           });
           movie.poster_url = POSTER_BASE + movie.poster_url;
           movie.reasonText = this.makeReasonText(movie.reasons);
+          movie.release_date = new Date(movie.release_date);
           this.movie = movie;
         },
         async fetchMovie() {

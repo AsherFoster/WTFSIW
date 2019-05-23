@@ -7,7 +7,7 @@ const RANKING = {
   AGE_WEIGHT_FACTOR: 0.1
 };
 const MEANINGFUL_JOBS = ['director', 'producer', 'writer'];
-const SAFE_MODE = false;
+const MARK_MODE = false;
 const PORT = process.env.PORT || 8080;
 
 import * as path from 'path';
@@ -19,14 +19,16 @@ import * as bodyParser from 'body-parser';
 const app = express();
 const dbPromise = sqlite.open(path.resolve(__dirname, '../data/db.sqlite'));
 let db: sqlite.Database;
-let GENRE_NAMES = new Map();
+let GENRE_NAMES = new Map<number, string>();
 
 namespace Database {
   export type Movie = {
     movie_id: number,
     title: string,
     overview: string,
-    poster_url: string|null
+    poster_url: string|null,
+    release_date: string,
+    average_rating: number
   }
   export type Genre = {
     genre_id: number,
@@ -74,10 +76,13 @@ type Filter = {
   role: string|null
 }
 type UserPref = {
-  added: Date|string, // ISO Formatted Date
+  added: string, // ISO Formatted Date
   type: FilterType,
   id: number,
   direction: -1|1
+}
+type Pref = UserPref & {
+  added: Date
 }
 
 class Movie {
@@ -100,14 +105,12 @@ class Movie {
     this.credits = movie.credits;
   }
 
-  public async getRenderableData(
-    {genres = true, credits = true}: {genres?: boolean, credits?: boolean} = {genres: true, credits: true} /// ... yeah, it's needed
-    ): Promise<RenderableMovie> { // Todo implement flagging
-    let data: RenderableMovie = {
-      ...(await db.get('SELECT * FROM movies WHERE movie_id = ?', this.movie_id) as Database.Movie)
-    };
+  public async getRenderableData( /// ... yeah, I'm pretty sure this next line is needed...
+    {genres = true, credits = true}: {genres?: boolean, credits?: boolean} = {genres: true, credits: true}
+    ): Promise<RenderableMovie> {
+    let data: RenderableMovie = await db.get('SELECT * FROM movies WHERE movie_id = ?', this.movie_id) as Database.Movie;
     if(genres)
-      data.genres = this.genres.map(id => ({genre_id: id, name: GENRE_NAMES.get(id)}));
+      data.genres = this.genres.map(id => ({genre_id: id, name: GENRE_NAMES.get(id) as string}));
     if(credits)
       data.credits = await db.all(`
 SELECT credit_id, credits.person_id, job, credit_type, people.name FROM credits
@@ -173,8 +176,6 @@ function rankMovie(movie: Movie, prefs: UserPref[]): RankedMovie {
   });
   let score = scores.reduce((a, b) => a + b.weight, 0);
 
-  scores.sort((a, b) => a.weight - b.weight);
-
   return {
     movie, score, scores
   };
@@ -201,7 +202,7 @@ function matchPref(movie: Movie, pref: UserPref): Ranking {
       weight = Math.random()
   }
   return {weight, pref}
-}
+} // Todo improve?
 function weightAge(nthBack: number, length: number): number {
   return 1.5 - (nthBack ** RANKING.AGE_WEIGHT_FACTOR) / 2
 }
@@ -222,32 +223,6 @@ async function pickMeaningfulCrewMember(movie: Movie): Promise<FullCredit> {
   let fullCredits = await Promise.all(allCrew.map(getFullCredit));
   fullCredits = fullCredits.filter(c => MEANINGFUL_JOBS.includes(c.job.toLowerCase()));
   return pickRandom(fullCredits);
-}
-async function prefToFilter(pref: UserPref): Promise<Filter> {
-  let {name, role} = await getFilterDetails(pref.type, pref.id);
-  return {
-    type: pref.type,
-    id: pref.id,
-    name,
-    direction: pref.direction,
-    role
-  }
-}
-async function getFilterDetails(type: FilterType, id: number): Promise<{name: string, role: string|null}> {
-  switch (type) {
-    case 'genre':
-      return {
-        name: GENRE_NAMES.get(id),
-        role: null
-      };
-    case 'cast':
-    case 'crew':
-      return {
-        // Can't retrieve role, as we don't have a movie
-        name: await db.get('SELECT name FROM people WHERE person_id = ?', id),
-        role: null
-      }
-  }
 }
 async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[]> {
   let types: FilterType[] = ['genre', 'genre', 'genre', 'cast', 'crew', 'crew']; // It works, ok
@@ -287,8 +262,20 @@ async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[
   }));
 }
 async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
-  scores = scores.filter(s => s.weight > 0); // Only show things that count this toward it
-  return Promise.all(scores.map((r) => prefToFilter(r.pref)))
+  return Promise.all(scores
+    .filter(s => s.weight > 0) // Only show things that count this toward it
+    .sort((a, b) => b.weight - a.weight)
+    .map(async ({weight, pref}) => {
+      return {
+        type: pref.type,
+        id: pref.id,
+        name: pref.type === 'genre' ?
+          GENRE_NAMES.get(pref.id) as string :
+          await db.get('SELECT name FROM people WHERE person_id = ?', pref.id),
+        direction: pref.direction,
+        role: null
+      }
+    }))
 }
 
 app.get('/movie', async (req, res) => {
@@ -328,25 +315,26 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
     } as Response);
   }
 
-  let randomSet = await getRandomMovies(RANKING.SAMPLE_SIZE);
-
-  const prefs = req.body.preferences.map((pref: UserPref) => {
-    pref.added = new Date(pref.added);
-    return pref;
+  const prefs: Pref[] = req.body.preferences.map((pref: UserPref) => {
+    return {
+      added: new Date(pref.added),
+      type: pref.type,
+      id: pref.id,
+      direction: pref.direction,
+    };
   });
 
+  let randomSet = await getRandomMovies(RANKING.SAMPLE_SIZE);
   let rankedMovies = rankMovies(randomSet, prefs);
   // The following algorithm generates a random index weighted towards the start
   let weightedRandom = Math.floor(randomSet.length - Math.sqrt(Math.random() * (randomSet.length ** 2)));
   // @ts-ignore, screw you typescript
   let rankedMovie = rankedMovies[weightedRandom];
 
-  let reasons = await generateReasons(rankedMovie.scores);
-
   res.send({
     ...(await rankedMovie.movie.getRenderableData({credits: false})),
     actions: await generateFilters(rankedMovie.movie, prefs),
-    reasons,
+    reasons: await generateReasons(rankedMovie.scores),
     _debug: DEBUG ? {
       weightedRandom,
       rankedMovies: rankedMovies.map(rm => ({
@@ -362,8 +350,8 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  if(SAFE_MODE && !req.query.safe) {
-    return res.redirect('/?safe=true');
+  if(MARK_MODE && !req.query.safe) {
+    return res.redirect('/?safe=true?debug=true');
   }
   res.sendFile(path.resolve(__dirname, '../static/index.html'));
 });

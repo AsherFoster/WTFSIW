@@ -4,7 +4,11 @@
 - `npm i`
 - `npm build`
 - Either build the database yourself, or place supplied data files in the `./data` dir
-- Start with `npm start`
+- `npm start`
+
+## Markers, listen up
+If you're marking this, you probably want to add `?safe=true&debug=true` to the url.
+Because it's a minimal site, the default UI doesn't meet the assessment requirements, so must be flagged.
 
 ## Configuration
 `server.js`

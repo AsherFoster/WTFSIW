@@ -1,4 +1,4 @@
-let movies = require('../movies');
+let movies = require('../data/movies');
 
 const stats = {
   maxTitleLength: 0,
@@ -11,6 +11,8 @@ const stats = {
   noCastCount: 0,
   noPosterCount: 0,
   noPersonCount: 0,
+  noVoteCount: 0,
+  noReleaseCount: 0
 };
 
 movies.forEach(movie => {
@@ -21,6 +23,11 @@ movies.forEach(movie => {
     stats.maxPosterLength = Math.max(movie.discover.poster_path.length, stats.maxPosterLength);
   else
     stats.noPosterCount++;
+
+  if(typeof movie.discover.vote_average !== 'number')
+    stats.noVoteCount++;
+  if(typeof movie.discover.release_date !== 'string')
+    stats.noReleaseCount++;
 
   if(movie.crew && movie.crew.length)
     movie.crew.forEach(crew => {
