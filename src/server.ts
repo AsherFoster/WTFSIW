@@ -1,3 +1,7 @@
+/*
+Talk about monoliths. Collapsing everything would help,
+and I'm not putting in the effort of moving stuff out of here
+* */
 const RANKING = {
   SAMPLE_SIZE: 10,
 
