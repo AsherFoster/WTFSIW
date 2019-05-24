@@ -43,19 +43,19 @@ type RenderableMovie = Database.Movie & {
   credits?: FullCredit[]
 }
 
-type FilterType = 'crew'|'cast'|'genre';
+type FilterType = 'crew' | 'cast' | 'genre';
 type Filter = {
   type: FilterType,
   id: number,
   name: string,
-  direction: -1|1,
-  role: string|null
+  direction: -1 | 1,
+  role: string | null
 }
 type UserPref = {
   added: string, // ISO Formatted Date
   type: FilterType,
   id: number,
-  direction: -1|1
+  direction: -1 | 1
 }
 type Pref = UserPref & {
   added: Date
@@ -82,17 +82,19 @@ class Movie {
   }
 
   public async getRenderableData( /// ... yeah, I'm pretty sure this next line is needed...
-    {genres = true, credits = true}: {genres?: boolean, credits?: boolean} = {genres: true, credits: true}
-    ): Promise<RenderableMovie> {
+    {genres = true, credits = true}: { genres?: boolean, credits?: boolean } = {genres: true, credits: true}
+  ): Promise<RenderableMovie> {
     let data: RenderableMovie = await db.get('SELECT * FROM movies WHERE movie_id = ?', this.movie_id) as Database.Movie;
-    if(genres)
+    if (genres) {
       data.genres = this.genres.map(id => ({genre_id: id, name: GENRE_NAMES.get(id) as string}));
-    if(credits)
+    }
+    if (credits) {
       data.credits = await db.all(`
 SELECT credit_id, credits.person_id, job, credit_type, people.name FROM credits
 INNER JOIN people ON credits.person_id = people.person_id
 WHERE credits.movie_id = ?;
       `, this.movie_id);
+    }
 
     return data;
   }
@@ -112,11 +114,13 @@ function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 function validateBody(body: any) {
-  if(
+  if (
     typeof body !== 'object' ||
     typeof body.preferences !== 'object' ||
     !Array.isArray(body.preferences)
-  ) return false;
+  ) {
+    return false;
+  }
   return body.preferences.every((pref: any) => {
     // For some reason typescript things that `any` has a added type that's simultaneously a string and a number
     // noinspection SuspiciousTypeOfGuard
@@ -125,7 +129,7 @@ function validateBody(body: any) {
       !isNaN(new Date(pref.added)) &&
       ['crew', 'cast', 'genre'].includes(pref.type) &&
       typeof pref.id === 'number' &&
-      [-1, 1].includes(pref.direction)
+      [-1, 1].includes(pref.direction);
   });
 }
 async function loadGenres() {
@@ -133,7 +137,7 @@ async function loadGenres() {
   dbGenres.forEach(({genre_id, name}) => GENRE_NAMES.set(genre_id, name));
 }
 async function getRandomMovies(n = 1) {
-  let ids = await db.all(`SELECT movie_id FROM movies ORDER BY RANDOM() LIMIT ?`, n) as {movie_id: number}[];
+  let ids = await db.all(`SELECT movie_id FROM movies ORDER BY RANDOM() LIMIT ?`, n) as { movie_id: number }[];
   return Promise.all(ids.map(({movie_id}) => Movie._load(movie_id)));
 }
 
@@ -145,7 +149,7 @@ function rankMovies(movies: Movie[], prefs: UserPref[]): RankedMovie[] {
 }
 function rankMovie(movie: Movie, prefs: UserPref[]): RankedMovie {
   prefs.sort((a, b) => +b.added - +a.added);
-  let scores = prefs.map((pref, i) =>{
+  let scores = prefs.map((pref, i) => {
     let score = matchPref(movie, pref);
     score.weight *= weightAge(i + 1, prefs.length);
     return score;
@@ -160,27 +164,27 @@ function matchPref(movie: Movie, pref: UserPref): Ranking {
   let weight = 0;
   switch (pref.type) {
     case 'genre':
-      if(movie.genres.includes(pref.id)) {
+      if (movie.genres.includes(pref.id)) {
         weight = pref.direction * RANKING.GENRE_WEIGHT;
       }
       break;
     case 'cast':
-      if(movie.credits.find(c => pref.id === c.person_id)) {
+      if (movie.credits.find(c => pref.id === c.person_id)) {
         weight = pref.direction * RANKING.CAST_WEIGHT;
       }
       break;
     case 'crew':
-      if(movie.credits.find(c => pref.id === c.person_id)) {
+      if (movie.credits.find(c => pref.id === c.person_id)) {
         weight = pref.direction * RANKING.CREW_WEIGHT;
       }
       break;
     default:
-      weight = Math.random()
+      weight = Math.random();
   }
-  return {weight, pref}
+  return {weight, pref};
 } // Todo improve?
 function weightAge(nthBack: number, length: number): number {
-  return 1.5 - (nthBack ** RANKING.AGE_WEIGHT_FACTOR) / 2
+  return 1.5 - (nthBack ** RANKING.AGE_WEIGHT_FACTOR) / 2;
 }
 
 // Filters, reasons
@@ -192,7 +196,7 @@ SELECT people.name, credits.job FROM credits
 INNER JOIN people ON people.person_id = credits.person_id
 WHERE credit_id = ?
     `, basicCredit.credit_id)
-  }
+  };
 }
 async function pickMeaningfulCrewMember(movie: Movie): Promise<FullCredit> {
   let allCrew = movie.credits.filter(c => c.credit_type === 'crew');
@@ -201,42 +205,47 @@ async function pickMeaningfulCrewMember(movie: Movie): Promise<FullCredit> {
   return pickRandom(fullCredits);
 }
 async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[]> {
-  let types: FilterType[] = ['genre', 'genre', 'genre', 'cast', 'crew', 'crew']; // It works, ok
-  let chosenTypes = [pickRandom(types), pickRandom(types)];
-  return Promise.all(chosenTypes.map(async type => {
-    switch(type) {
-      case 'genre':
-        let genre = pickRandom(movie.genres);
-        return {
-          type,
-          id: genre,
-          name: GENRE_NAMES.get(genre),
-          direction: Math.random() > 0.5 ? -1 : 1,
-          role: null
-        } as Filter;
-      case 'crew':
-        let crew = await pickMeaningfulCrewMember(movie);
-        return {
-          type,
-          id: crew.person_id,
-          name: crew.name,
-          direction: Math.random() > 0.5 ? -1 : 1,
-          role: crew.job
-        } as Filter;
-      case 'cast':
-        let cast = pickRandom(movie.credits.filter(c => c.credit_type === 'cast'));
-        let {name, job} = await getFullCredit(cast);
-        return {
-          type,
-          id: cast.person_id,
-          name,
-          direction: Math.random() > 0.5 ? -1 : 1,
-          role: job
-        } as Filter
-
-    }
-  }));
+  let count = 1 + Math.ceil(Math.random() * 2); // Make between 1 and 3 filters
+  let filters = [];
+  for(let i = 0; i < count; i++) {
+    filters.push(await tryGenerateFilter(movie, prefs))
+  }
+  return filters;
 }
+async function tryGenerateFilter(movie: Movie, prefs: UserPref[]): Promise<Filter> {
+  let type: FilterType = pickRandom(['genre', 'genre', 'genre', 'cast', 'crew', 'crew']); // It works, ok
+  switch (type) {
+    case 'genre':
+      let genre = pickRandom(movie.genres);
+      return {
+        type,
+        id: genre,
+        name: GENRE_NAMES.get(genre),
+        direction: Math.random() > 0.5 ? -1 : 1,
+        role: null
+      } as Filter;
+    case 'crew':
+      let crew = await pickMeaningfulCrewMember(movie);
+      return {
+        type,
+        id: crew.person_id,
+        name: crew.name,
+        direction: Math.random() > 0.5 ? -1 : 1,
+        role: crew.job
+      } as Filter;
+    case 'cast':
+      let cast = pickRandom(movie.credits.filter(c => c.credit_type === 'cast'));
+      let {name, job} = await getFullCredit(cast);
+      return {
+        type,
+        id: cast.person_id,
+        name,
+        direction: Math.random() > 0.5 ? -1 : 1,
+        role: job
+      } as Filter;
+  }
+}
+
 async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
   return Promise.all(scores
     .filter(s => s.weight > 0) // Only show things that count this toward it
@@ -250,8 +259,8 @@ async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
           await db.get('SELECT name FROM people WHERE person_id = ?', pref.id),
         direction: pref.direction,
         role: null
-      }
-    }))
+      };
+    }));
 }
 
 app.get('/movie', async (req, res) => {
@@ -267,14 +276,14 @@ type Response = {
   movie_id: number,
   title: string,
   overview: string,
-  poster_url: string|null,
+  poster_url: string | null,
   actions: Filter[],
   reasons: Filter[]
 }
 app.options('/movie', cors());
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   const DEBUG = !!req.query.debug;
-  if(!validateBody(req.body)) {
+  if (!validateBody(req.body)) {
     return res.status(400).send({
       error: 'malformed',
       message: 'The body provided must be a JSON object in the correct format'
@@ -282,7 +291,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   }
 
   // Skip the sorting logic if no prefs are set, just spit out a random movie
-  if(!req.body.preferences.length) {
+  if (!req.body.preferences.length) {
     let movie = (await getRandomMovies(1))[0];
     return res.send({
       ...(await movie.getRenderableData({credits: false})),
@@ -322,14 +331,17 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
         scores: rm.scores
       }))
     } : undefined
-  } as Response)
+  } as Response);
 });
 
 app.get('/', (req, res) => {
-  if(MARK_MODE && !req.query.safe) {
+  if (MARK_MODE && !req.query.safe) {
     return res.redirect('/?safe=true?debug=true');
   }
   res.sendFile(path.resolve(__dirname, '../static/index.html'));
+});
+app.get('/app.js', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../static/app.js'));
 });
 
 async function main() {
