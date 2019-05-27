@@ -49,7 +49,7 @@ type Filter = {
   id: number,
   name: string,
   direction: -1 | 1,
-  role: string | null
+  job: string | null
 }
 type UserPref = {
   added: string, // ISO Formatted Date
@@ -124,7 +124,7 @@ function validateBody(body: any) {
   return body.preferences.every((pref: any) => {
     // For some reason typescript things that `any` has a added type that's simultaneously a string and a number
     // noinspection SuspiciousTypeOfGuard
-    return typeof pref.added === 'string' && // TODO Validate as date
+    return typeof pref.added === 'string' &&
       // @ts-ignore
       !isNaN(new Date(pref.added)) &&
       ['crew', 'cast', 'genre'].includes(pref.type) &&
@@ -198,54 +198,64 @@ WHERE credit_id = ?
     `, basicCredit.credit_id)
   };
 }
-async function pickMeaningfulCrewMember(movie: Movie): Promise<FullCredit> {
+async function getMeaningfulCrewMembers(movie: Movie): Promise<FullCredit[]> {
   let allCrew = movie.credits.filter(c => c.credit_type === 'crew');
   let fullCredits = await Promise.all(allCrew.map(getFullCredit));
   fullCredits = fullCredits.filter(c => MEANINGFUL_JOBS.includes(c.job.toLowerCase()));
-  return pickRandom(fullCredits);
+  return fullCredits;
+}
+async function getMeaningfulCastMembers(movie: Movie): Promise<FullCredit[]> {
+  let allCrew = movie.credits.filter(c => c.credit_type === 'cast');
+  let fullCredits = await Promise.all(allCrew.map(getFullCredit));
+  fullCredits.sort((a, b) => <number>a.credit_order - <number>b.credit_order); // Ascending order
+  let count = 5 + Math.floor(fullCredits.length * 0.1); // Get the most interesting credits only
+  return fullCredits.slice(0, count);
 }
 async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[]> {
-  let count = 1 + Math.ceil(Math.random() * 2); // Make between 1 and 3 filters
+  let allOptions: Filter[] = [];
+  movie.genres.forEach(g => {
+    allOptions.push({
+      type: 'genre',
+      id: g,
+      name: GENRE_NAMES.get(g) as string,
+      direction: Math.random() > 0.5 ? -1 : 1,
+      job: null
+    });
+  });
+  (await getMeaningfulCrewMembers(movie)).forEach(crew => {
+    allOptions.push({
+      type: 'crew',
+      id: crew.person_id,
+      name: crew.name,
+      direction: Math.random() > 0.5 ? -1 : 1,
+      job: crew.job
+    })
+  });
+  (await getMeaningfulCastMembers(movie)).forEach(cast => {
+    allOptions.push({
+      type: 'cast',
+      id: cast.person_id,
+      name: cast.name,
+      direction: Math.random() > 0.5 ? -1 : 1,
+      job: cast.job
+    });
+  });
+
+  allOptions.filter(filter => {
+    return !(prefs.find(p => p.id === filter.id && p.type === filter.type) // TODO Maybe compare direction?
+      // TODO think of more interesting things to put here
+    );
+  });
+
   let filters = [];
+  let count = Math.min(3, allOptions.length); // Make between 1 and 3 filters
   for(let i = 0; i < count; i++) {
-    filters.push(await tryGenerateFilter(movie, prefs))
+    let opt = Math.floor(Math.random() * allOptions.length);
+    filters.push(allOptions[opt]);
+    allOptions.splice(opt, 1);
   }
   return filters;
 }
-async function tryGenerateFilter(movie: Movie, prefs: UserPref[]): Promise<Filter> {
-  let type: FilterType = pickRandom(['genre', 'genre', 'genre', 'cast', 'crew', 'crew']); // It works, ok
-  switch (type) {
-    case 'genre':
-      let genre = pickRandom(movie.genres);
-      return {
-        type,
-        id: genre,
-        name: GENRE_NAMES.get(genre),
-        direction: Math.random() > 0.5 ? -1 : 1,
-        role: null
-      } as Filter;
-    case 'crew':
-      let crew = await pickMeaningfulCrewMember(movie);
-      return {
-        type,
-        id: crew.person_id,
-        name: crew.name,
-        direction: Math.random() > 0.5 ? -1 : 1,
-        role: crew.job
-      } as Filter;
-    case 'cast':
-      let cast = pickRandom(movie.credits.filter(c => c.credit_type === 'cast'));
-      let {name, job} = await getFullCredit(cast);
-      return {
-        type,
-        id: cast.person_id,
-        name,
-        direction: Math.random() > 0.5 ? -1 : 1,
-        role: job
-      } as Filter;
-  }
-}
-
 async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
   return Promise.all(scores
     .filter(s => s.weight > 0) // Only show things that count this toward it
@@ -258,7 +268,7 @@ async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
           GENRE_NAMES.get(pref.id) as string :
           await db.get('SELECT name FROM people WHERE person_id = ?', pref.id),
         direction: pref.direction,
-        role: null
+        job: null
       };
     }));
 }

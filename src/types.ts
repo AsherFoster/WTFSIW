@@ -22,7 +22,8 @@ export namespace Database {
     person_id: number,
     movie_id: number,
     credit_type: CreditType,
-    job: string
+    job: string,
+    credit_order: number|null
   }
   export type Person = {
     person_id: number,

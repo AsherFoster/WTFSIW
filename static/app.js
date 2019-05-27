@@ -113,14 +113,14 @@
         else
           return 'love ' + pos.map(f => f.name).join(', ');
       },
-      makeActionText({type, name, direction, role}) {
+      makeActionText({type, name, direction, job}) {
         let filterTypes = direction === 1 ? filters.positive : filters.negative;
         let texts = filterTypes[type].concat(filterTypes.generic);
         let template = pickRandom(texts);
         template = conditionalFilter(template);
 
-        if (role) {
-          name = `${name} (${role})`;
+        if (job) {
+          name = `${name} (${job})`;
         }
         return template.replace('$', name)
       },
