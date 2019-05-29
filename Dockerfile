@@ -10,8 +10,6 @@ RUN npm install
 # Copy source
 COPY . .
 
-ENV NODE_ENV prod
-
 RUN npm run build
 
 USER node

@@ -3,7 +3,7 @@ Talk about monoliths. Collapsing everything would help,
 and I'm not putting in the effort of moving stuff out of here
 * */
 const RANKING = {
-  SAMPLE_SIZE: 10,
+  SAMPLE_SIZE: 15,
 
   GENRE_WEIGHT: 2,
   CAST_WEIGHT: 2,
@@ -11,37 +11,25 @@ const RANKING = {
   AGE_WEIGHT_FACTOR: 0.1
 };
 const MEANINGFUL_JOBS = ['director', 'producer', 'writer'];
-const MARK_MODE = false;
 const PORT = process.env.PORT || 8080;
-
+const PRODUCTION = process.env.NODE_ENV === 'production';
 import * as path from 'path';
+import * as Sentry from '@sentry/node';
 import * as sqlite from 'sqlite';
 import * as express from 'express';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 
+Sentry.init({dsn: process.env.SENTRY_DSN});
+
+import Movie, {BasicCredit, FullCredit} from './movie';
 import {Database} from './types';
 
 const app = express();
 const dbPromise = sqlite.open(path.resolve(__dirname, '../data/db.sqlite'));
+const ROOT = path.resolve(__dirname, '..');
 let db: sqlite.Database;
 let GENRE_NAMES = new Map<number, string>();
-
-type BasicCredit = {
-  credit_id: string,
-  person_id: number,
-  credit_type: Database.CreditType,
-}
-type FullCredit = Database.Credit & Database.Person;
-type BasicMovie = {
-  movie_id: number;
-  genres: number[];
-  credits: BasicCredit[];
-}
-type RenderableMovie = Database.Movie & {
-  genres?: Database.Genre[]
-  credits?: FullCredit[]
-}
 
 type FilterType = 'crew' | 'cast' | 'genre';
 type Filter = {
@@ -59,45 +47,6 @@ type UserPref = {
 }
 type Pref = UserPref & {
   added: Date
-}
-
-class Movie {
-  public static async _load(id: number) {
-    return new this({
-      movie_id: id,
-      genres: (await db.all('SELECT genre_id FROM genre_links WHERE movie_id = ?', id) as Database.GenreLink[])
-        .map(({genre_id}) => genre_id),
-      credits: (await db.all('SELECT credit_id, person_id, credit_type FROM credits WHERE movie_id = ?', id))
-    });
-  }
-
-  public movie_id: number;
-  public genres: number[];
-  public credits: BasicCredit[];
-
-  constructor(movie: BasicMovie) {
-    this.movie_id = movie.movie_id;
-    this.genres = movie.genres;
-    this.credits = movie.credits;
-  }
-
-  public async getRenderableData( /// ... yeah, I'm pretty sure this next line is needed...
-    {genres = true, credits = true}: { genres?: boolean, credits?: boolean } = {genres: true, credits: true}
-  ): Promise<RenderableMovie> {
-    let data: RenderableMovie = await db.get('SELECT * FROM movies WHERE movie_id = ?', this.movie_id) as Database.Movie;
-    if (genres) {
-      data.genres = this.genres.map(id => ({genre_id: id, name: GENRE_NAMES.get(id) as string}));
-    }
-    if (credits) {
-      data.credits = await db.all(`
-SELECT credit_id, credits.person_id, job, credit_type, people.name FROM credits
-INNER JOIN people ON credits.person_id = people.person_id
-WHERE credits.movie_id = ?;
-      `, this.movie_id);
-    }
-
-    return data;
-  }
 }
 
 type RankedMovie = {
@@ -138,7 +87,7 @@ async function loadGenres() {
 }
 async function getRandomMovies(n = 1) {
   let ids = await db.all(`SELECT movie_id FROM movies ORDER BY RANDOM() LIMIT ?`, n) as { movie_id: number }[];
-  return Promise.all(ids.map(({movie_id}) => Movie._load(movie_id)));
+  return Promise.all(ids.map(({movie_id}) => Movie._load(db, GENRE_NAMES, movie_id)));
 }
 
 // Ranking
@@ -273,6 +222,7 @@ async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
     }));
 }
 
+app.use(Sentry.Handlers.requestHandler());
 app.get('/movie', async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   let movie = (await getRandomMovies(1))[0];
@@ -292,7 +242,7 @@ type Response = {
 }
 app.options('/movie', cors());
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
-  const DEBUG = !!req.query.debug;
+  const DEBUG = !PRODUCTION && !!req.query.debug;
   if (!validateBody(req.body)) {
     return res.status(400).send({
       error: 'malformed',
@@ -323,7 +273,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   let rankedMovies = rankMovies(randomSet, prefs);
   // The following algorithm generates a random index weighted towards the start
   let weightedRandom = Math.floor(randomSet.length - Math.sqrt(Math.random() * (randomSet.length ** 2)));
-  // @ts-ignore, screw you typescript
+
   let rankedMovie = rankedMovies[weightedRandom];
 
   res.send({
@@ -345,14 +295,11 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  if (MARK_MODE && !req.query.safe) {
-    return res.redirect('/?safe=true?debug=true');
-  }
-  res.sendFile(path.resolve(__dirname, '../static/index.html'));
+  res.sendFile(ROOT +  '/static/index.html');
 });
-app.get('/app.js', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../static/app.js'));
-});
+app.use('/static', express.static(ROOT + '/static'));
+
+app.use(Sentry.Handlers.errorHandler());
 
 async function main() {
   db = await dbPromise;

@@ -158,10 +158,14 @@
       window.location.reload();
     }
   }
+  function loaded() {
+    document.getElementById('app').style.display = '';
+  }
 
   loadPreferences();
 
   if (FLAGS.safe)
     document.title = conditionalFilter(document.title);
+  setTimeout(() => loaded(), 0);
   await app.loadMovie();
 })();

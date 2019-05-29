@@ -2,64 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name='viewport' content='width=device-width, initial-scale=1'/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>What the Fuck Should I Watch?!</title>
-  <link href="https://fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
-  <!--  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-  <style>
-    * {
-      font-family: "Karla", "Arial", sans-serif;
-    }
-
-    a {
-      color: inherit;
-    }
-
-    .wrapper {
-      max-width: 650px;
-      margin: auto;
-      font-size: 20px;
-    }
-
-    h1 {
-      text-transform: uppercase;
-      font-size: 70px;
-      margin-bottom: 10px;
-    }
-
-    .top-hr {
-      margin-left: 0;
-      width: 300px;
-      border: 3px solid #000;
-    }
-
-    .description {
-      margin-bottom: 40px;
-    }
-
-    .actions a {
-      display: block;
-      margin: 12px 0;
-    }
-
-    .reasoning {
-      font-style: italic;
-    }
-
-    .footer {
-      margin-top: 60px;
-      font-size: 16px;
-    }
-
-    .footer-hr {
-      width: 100px;
-      margin: 0;
-    }
-  </style>
+  <link rel="icon" href="/static/icon_tiny.png">
+  <meta name="description" content="Need a fucking movie suggestion? Spending fucking ages scrolling through Netflix? Fucking try this already." />
+  <meta name="og:title" content="What the Fuck Should I Watch?"/>
+  <meta name="og:description" content="Need a fucking movie suggestion? Spending fucking ages scrolling through Netflix? Fucking try this already." />
+  <meta name="og:image" content="https://whatthefuckshouldiwatch.asherfoster.com/static/icon_big.png">
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:site" content="asherfoster"/>
+  <link href="//fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+  <script src="https://browser.sentry-cdn.com/5.3.0/bundle.min.js" crossorigin="anonymous"></script>
+  <script>Sentry.init({ dsn: 'https://d86a405cbf3242aaaac3a3ff2416d04a@sentry.io/1470209' });</script>
+  <script src="//cdn.jsdelivr.net/npm/vue"></script>
 </head>
 <body>
-<div id="app" class="wrapper">
+<div id="app" class="wrapper" style="display: none">
   <h1>{{title}}</h1>
   <hr class="top-hr">
   <div v-if="!deviceError && movie" class="suggestion">
@@ -73,14 +32,14 @@
     </div>
     <footer class="footer">
       <p class="reasoning" v-if="movie.reasonText">Suggested because you {{movie.reasonText}}</p>
-      <div v-if="debug">
-        <hr class="footer-hr">
-        <p>{{movie.genres.map(g => g.name).join(', ')}}</p>
-        <p>Released in {{1900 + movie.release_date.getYear()}}. Score: {{movie.average_rating}}</p>
-        <p><a href="#" v-if="movie.poster_url" @click="togglePoster()">Show me the {{fuck}}ing poster</a></p>
-      </div>
       <hr class="footer-hr">
-      <p>Made by Asher Foster with a {{fuck}} ton of luck. This product uses the TMDb API but is not endorsed or certified by TMDb.</p>
+      <p>
+        <a href="//github.com/asherfoster/wtfsiw">Github</a> -
+        <a href="//asherfoster.com/things/whatthefuckshouldiwatch">About</a>
+        <br>
+        Made by Asher Foster with a {{fuck}} ton of luck.
+        This product uses the TMDb API but is not endorsed or certified by TMDb.
+      </p>
     </footer>
     <img v-if="movie.poster_url && poster" :src="movie.poster_url">
   </div>
@@ -92,6 +51,6 @@
     <h2>Loading...</h2>
   </div>
 </div>
-<script src="app.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>
