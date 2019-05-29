@@ -61,7 +61,7 @@
         "localStorage" in window
       ),
       loading: false,
-      debug: FLAGS.debug,
+      flags: FLAGS,
       fuck: FUCK
     },
     methods: {

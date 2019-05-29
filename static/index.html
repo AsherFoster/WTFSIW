@@ -13,7 +13,7 @@
   <meta name="twitter:site" content="asherfoster"/>
   <link href="//fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
-  <script src="https://browser.sentry-cdn.com/5.3.0/bundle.min.js" crossorigin="anonymous"></script>
+  <script src="//browser.sentry-cdn.com/5.3.0/bundle.min.js" crossorigin="anonymous"></script>
   <script>Sentry.init({ dsn: 'https://d86a405cbf3242aaaac3a3ff2416d04a@sentry.io/1470209' });</script>
   <script src="//cdn.jsdelivr.net/npm/vue"></script>
 </head>
@@ -36,6 +36,9 @@
       <p>
         <a href="//github.com/asherfoster/wtfsiw">Github</a> -
         <a href="//asherfoster.com/things/whatthefuckshouldiwatch">About</a>
+        <span v-if="!flags.safe">
+          - <a href="?safe=true">Stop fucking swearing</a>
+        </span>
         <br>
         Made by Asher Foster with a {{fuck}} ton of luck.
         This product uses the TMDb API but is not endorsed or certified by TMDb.
