@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as sqlite from 'sqlite';
-import * as assert from 'assert';
 import {API, DataDump} from '../types';
 
 const movies: DataDump[] = require('../../data/movies');
@@ -20,21 +19,20 @@ async function addRatingAndRelease(id: number) {
   if(movie.discover.release_date.length === 0) {
     console.log('NO date');
   } else {
-    date = new Date(movie.discover.release_date).toISOString()
+    date = new Date(movie.discover.release_date).toISOString();
   }
   let vote = movie.discover.vote_average;
   await db.run('UPDATE movies SET average_rating = ?, release_date = ? WHERE movie_id = ?', vote, date, id);
-  console.log(`√ Patched ${id}`)
+  console.log(`√ Patched ${id}`);
 }
 async function addCreditOrders(id: number) {
   let {cast} = movies.find(m => m.discover.id === id) as DataDump;
   if(!cast) return;
   return Promise.all(cast.map(c => {
-    if(!c.order && c.order !== 0)
-      console.error(c.credit_id, c.order);
-    return db.run('UPDATE credits SET credit_order = ? WHERE credit_id = ?', c.order, c.credit_id)
+    if(!c.order && c.order !== 0) console.error(c.credit_id, c.order);
+    return db.run('UPDATE credits SET credit_order = ? WHERE credit_id = ?', c.order, c.credit_id);
 
-  }))
+  }));
 }
 
 async function main() {

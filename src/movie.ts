@@ -5,32 +5,31 @@ export type BasicCredit = {
   credit_id: string,
   person_id: number,
   credit_type: Database.CreditType,
-}
+};
 export type FullCredit = Database.Credit & Database.Person;
 
 export type BasicMovie = {
   movie_id: number;
   genres: number[];
   credits: BasicCredit[];
-}
+};
 export type RenderableMovie = Database.Movie & {
   genres?: Database.Genre[]
   credits?: FullCredit[]
-}
+};
 
 export default class Movie {
-  public static async _load(db: sqlite.Database, genreNames: Map<number, string>, id: number) {
-    return new this(db, genreNames, {
-      movie_id: id,
-      genres: (await db.all('SELECT genre_id FROM genre_links WHERE movie_id = ?', id) as Database.GenreLink[])
-        .map(({genre_id}) => genre_id),
-      credits: (await db.all('SELECT credit_id, person_id, credit_type FROM credits WHERE movie_id = ?', id))
-    });
-  }
-
   public movie_id: number;
   public genres: number[];
   public credits: BasicCredit[];
+  public static async _load(db: sqlite.Database, genreNames: Map<number, string>, id: number) {
+    return new this(db, genreNames, {
+      credits: (await db.all('SELECT credit_id, person_id, credit_type FROM credits WHERE movie_id = ?', id)),
+      genres: (await db.all('SELECT genre_id FROM genre_links WHERE movie_id = ?', id) as Database.GenreLink[])
+        .map(({genre_id}) => genre_id),
+      movie_id: id
+    });
+  }
 
   constructor(private db: sqlite.Database,
               private genreNames: Map<number, string>,

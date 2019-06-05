@@ -3,12 +3,11 @@ Talk about monoliths. Collapsing everything would help,
 and I'm not putting in the effort of moving stuff out of here
 * */
 const RANKING = {
-  SAMPLE_SIZE: 15,
-
-  GENRE_WEIGHT: 2,
+  AGE_WEIGHT_FACTOR: 0.1,
   CAST_WEIGHT: 2,
   CREW_WEIGHT: 2,
-  AGE_WEIGHT_FACTOR: 0.1
+  GENRE_WEIGHT: 2,
+  SAMPLE_SIZE: 15,
 };
 const MEANINGFUL_JOBS = ['director', 'producer', 'writer'];
 const PORT = process.env.PORT || 8080;
@@ -38,30 +37,27 @@ type Filter = {
   name: string,
   direction: -1 | 1,
   job: string | null
-}
+};
 type UserPref = {
   added: string, // ISO Formatted Date
   type: FilterType,
   id: number,
   direction: -1 | 1
-}
+};
 type Pref = UserPref & {
   added: Date
-}
+};
 
 type RankedMovie = {
   score: number,
   scores: Ranking[],
   movie: Movie
-}
+};
 type Ranking = {
   weight: number,
   pref: UserPref
-}
+};
 
-function pickRandom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 function validateBody(body: any) {
   if (
     typeof body !== 'object' ||
@@ -99,9 +95,9 @@ function rankMovies(movies: Movie[], prefs: UserPref[]): RankedMovie[] {
 function rankMovie(movie: Movie, prefs: UserPref[]): RankedMovie {
   prefs.sort((a, b) => +b.added - +a.added);
   let scores = prefs.map((pref, i) => {
-    let score = matchPref(movie, pref);
-    score.weight *= weightAge(i + 1, prefs.length);
-    return score;
+    let rank = matchPref(movie, pref);
+    rank.weight *= weightAge(i + 1, prefs.length);
+    return rank;
   });
   let score = scores.reduce((a, b) => a + b.weight, 0);
 
@@ -164,29 +160,29 @@ async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[
   let allOptions: Filter[] = [];
   movie.genres.forEach(g => {
     allOptions.push({
-      type: 'genre',
-      id: g,
-      name: GENRE_NAMES.get(g) as string,
       direction: Math.random() > 0.5 ? -1 : 1,
-      job: null
+      id: g,
+      job: null,
+      name: GENRE_NAMES.get(g) as string,
+      type: 'genre'
     });
   });
   (await getMeaningfulCrewMembers(movie)).forEach(crew => {
     allOptions.push({
-      type: 'crew',
-      id: crew.person_id,
-      name: crew.name,
       direction: Math.random() > 0.5 ? -1 : 1,
-      job: crew.job
-    })
+      id: crew.person_id,
+      job: crew.job,
+      name: crew.name,
+      type: 'crew'
+    });
   });
   (await getMeaningfulCastMembers(movie)).forEach(cast => {
     allOptions.push({
-      type: 'cast',
-      id: cast.person_id,
-      name: cast.name,
       direction: Math.random() > 0.5 ? -1 : 1,
-      job: cast.job
+      id: cast.person_id,
+      job: cast.job,
+      name: cast.name,
+      type: 'cast'
     });
   });
 
@@ -211,13 +207,13 @@ async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
     .sort((a, b) => b.weight - a.weight)
     .map(async ({weight, pref}) => {
       return {
-        type: pref.type,
+        direction: pref.direction,
         id: pref.id,
+        job: null,
         name: pref.type === 'genre' ?
           GENRE_NAMES.get(pref.id) as string :
           await db.get('SELECT name FROM people WHERE person_id = ?', pref.id),
-        direction: pref.direction,
-        job: null
+        type: pref.type,
       };
     }));
 }
@@ -231,7 +227,7 @@ app.get('/movie', async (req, res) => {
 
 type PostData = {
   preferences: UserPref[]
-}
+};
 type Response = {
   movie_id: number,
   title: string,
@@ -239,7 +235,7 @@ type Response = {
   poster_url: string | null,
   actions: Filter[],
   reasons: Filter[]
-}
+};
 app.options('/movie', cors());
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   const DEBUG = !PRODUCTION && !!req.query.debug;
@@ -263,9 +259,9 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   const prefs: Pref[] = req.body.preferences.map((pref: UserPref) => {
     return {
       added: new Date(pref.added),
-      type: pref.type,
-      id: pref.id,
       direction: pref.direction,
+      id: pref.id,
+      type: pref.type
     };
   });
 
@@ -284,8 +280,8 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
       weightedRandom,
       rankedMovies: rankedMovies.map(rm => ({
         movie: {
-          movie_id: rm.movie.movie_id,
-          genres: rm.movie.genres
+          genres: rm.movie.genres,
+          movie_id: rm.movie.movie_id
         },
         score: rm.score,
         scores: rm.scores

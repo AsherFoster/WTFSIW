@@ -7,15 +7,15 @@ export namespace Database {
     poster_url: string|null,
     release_date: string,
     average_rating: number
-  }
+  };
   export type Genre = {
     genre_id: number,
     name: string
-  }
+  };
   export type GenreLink = {
     genre_id: number,
     movie_id: number
-  }
+  };
   export type CreditType = 'cast'|'crew';
   export type Credit = {
     credit_id: string,
@@ -24,11 +24,11 @@ export namespace Database {
     credit_type: CreditType,
     job: string,
     credit_order: number|null
-  }
+  };
   export type Person = {
     person_id: number,
     name: string
-  }
+  };
 }
 
 export namespace API {
@@ -47,7 +47,7 @@ export namespace API {
     adult: boolean,
     overview: string,
     release_date: string
-  }
+  };
   export type Cast = {
     cast_id: number,
     character: string,
@@ -57,7 +57,7 @@ export namespace API {
     name: string,
     order: number,
     profile_path: string|null
-  }
+  };
   export type Crew = {
     credit_id: string,
     department: string,
@@ -66,15 +66,15 @@ export namespace API {
     job: string,
     name: string,
     profile_path: string|null
-  }
-  export type Genres = {
+  };
+  export type Genre = {
     name: string,
     id: number
-  }
+  };
 }
 
 export type DataDump = {
   discover: API.DiscoverMovie,
   cast: API.Cast[]|null
   crew: API.Crew[]|null,
-}
+};

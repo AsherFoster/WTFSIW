@@ -59,10 +59,10 @@ async function getDiscoverPage(page: number) {
   };
 }
 
-async function getMovieDetails(id: number) {
+async function getMovieDetails(id: number): Promise<{cast: API.Cast[], crew: API.Crew[]}> {
   // @ts-ignore
-  const {cast, crew} = await apiGet(`/movie/${id}/credits`) as {cast: API.Cast, crew: API.Crew};
-  return {cast, crew}
+  const {cast, crew} = await apiGet(`/movie/${id}/credits`);
+  return {cast, crew};
 }
 async function getGenres() {
   // @ts-ignore
