@@ -234,11 +234,15 @@ type Response = {
   overview: string,
   poster_url: string | null,
   actions: Filter[],
-  reasons: Filter[]
+  reasons: Filter[],
+  _debug?: any
+};
+type ExpressResponse = express.Response & {
+  sentry: string
 };
 app.options('/movie', cors());
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
-  const DEBUG = !PRODUCTION && !!req.query.debug;
+  const DEBUG = !!req.query.debug;
   if (!validateBody(req.body)) {
     return res.status(400).send({
       error: 'malformed',
@@ -249,9 +253,11 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   // Skip the sorting logic if no prefs are set, just spit out a random movie
   if (!req.body.preferences.length) {
     let movie = (await getRandomMovies(1))[0];
+    const renderableData = await movie.getRenderableData({credits: false});
+    const actions = await generateFilters(movie, []);
     return res.send({
-      ...(await movie.getRenderableData({credits: false})),
-      actions: await generateFilters(movie, []),
+      ...renderableData,
+      actions,
       reasons: []
     } as Response);
   }
@@ -272,11 +278,13 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
 
   let rankedMovie = rankedMovies[weightedRandom];
 
-  res.send({
+  const response = {
     ...(await rankedMovie.movie.getRenderableData({credits: false})),
     actions: await generateFilters(rankedMovie.movie, prefs),
-    reasons: await generateReasons(rankedMovie.scores),
-    _debug: DEBUG ? {
+    reasons: await generateReasons(rankedMovie.scores)
+  } as Response;
+  if(DEBUG) {
+    response._debug = {
       weightedRandom,
       rankedMovies: rankedMovies.map(rm => ({
         movie: {
@@ -286,8 +294,9 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
         score: rm.score,
         scores: rm.scores
       }))
-    } : undefined
-  } as Response);
+    };
+  }
+  res.send(response);
 });
 
 app.get('/', (req, res) => {
@@ -296,6 +305,17 @@ app.get('/', (req, res) => {
 app.use('/static', express.static(ROOT + '/static'));
 
 app.use(Sentry.Handlers.errorHandler());
+// @ts-ignore really not sure why it's complaining
+app.use((err: Error, req: express.Request, res: ExpressResponse, next: express.NextFunction) => {
+  console.error(err);
+  res.status(500);
+  res.json({
+    error: {
+      message: 'Unknown error. This has been reported',
+      id: res.sentry
+    }
+  });
+});
 
 async function main() {
   db = await dbPromise;

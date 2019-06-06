@@ -56,10 +56,13 @@
       title: conditionalFilter(pickRandom(titles)),
       movie: null,
       poster: false,
-      deviceError: !(
+      error: !(
         "fetch" in window &&
         "localStorage" in window
-      ),
+      ) ? {
+        title: 'Your device is ancient as ' + FUCK,
+        message: 'This website requires a modern browser, please upgrade'
+      } : null,
       loading: false,
       flags: FLAGS,
       fuck: FUCK
@@ -85,15 +88,22 @@
         this.savePreferences();
       },
       async loadMovie() {
-        let movie = await this.fetchMovie();
-        movie.link = SOURCE_PAGE_BASE + movie.movie_id;
-        movie.actions.map(action => {
-          action.text = this.makeActionText(action);
-        });
-        movie.poster_url = POSTER_BASE + movie.poster_url;
-        movie.reasonText = this.makeReasonText(movie.reasons);
-        movie.release_date = new Date(movie.release_date);
-        this.movie = movie;
+        try {
+          let movie = await this.fetchMovie();
+          movie.link = SOURCE_PAGE_BASE + movie.movie_id;
+          movie.actions.map(action => {
+            action.text = this.makeActionText(action);
+          });
+          movie.poster_url = POSTER_BASE + movie.poster_url;
+          movie.reasonText = this.makeReasonText(movie.reasons);
+          movie.release_date = new Date(movie.release_date);
+          this.movie = movie;
+        } catch(e) {
+          this.error = {
+            title: 'Unexpected Error',
+            message: e.message
+          }
+        }
       },
       async fetchMovie() {
         let res = await fetch('/movie' + (FLAGS.debug ? '?debug=true' : ''), {
@@ -104,6 +114,7 @@
           },
           body: JSON.stringify({preferences})
         });
+        if(!res.ok) throw new Error(res.statusCode + ': Something went wrong.');
         return res.json();
       },
       makeReasonText(reasons) {
@@ -167,5 +178,7 @@
   if (FLAGS.safe)
     document.title = conditionalFilter(document.title);
   setTimeout(() => loaded(), 0);
-  await app.loadMovie();
+  if(!app.error) { // If it hasn't already failed
+    await app.loadMovie();
+  }
 })();

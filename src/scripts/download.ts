@@ -90,7 +90,7 @@ const limiter = new Bottleneck({
 
   minTime: 250
 });
-const apiGet = limiter.wrap(_apiGet);
+const apiGet = limiter.wrap(_apiGet) as (method: string, params: object) => Promise<any>;
 
 function makeUrl(method: string, params: {[propKey: string]: any}) {
   params.api_key = CONFIG.apiKey;

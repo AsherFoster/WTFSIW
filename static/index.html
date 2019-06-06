@@ -21,7 +21,7 @@
 <div id="app" class="wrapper" style="display: none">
   <h1>{{title}}</h1>
   <hr class="top-hr">
-  <div v-if="!deviceError && movie" class="suggestion">
+  <div v-if="!error && movie" class="suggestion">
     <h2>{{movie.title | conditionalFilter}}</h2>
     <p class="description">
       {{movie.overview | trim(400)}} -&nbsp;<a :href="movie.link">TMDb</a>
@@ -46,9 +46,9 @@
     </footer>
     <img v-if="movie.poster_url && poster" :src="movie.poster_url">
   </div>
-  <div v-else-if="deviceError">
-    <h2>Your device is ancient as {{fuck}}</h2>
-    <p>This website requires a modern browser, please upgrade</p>
+  <div v-else-if="error">
+    <h2>{{error.title}}</h2>
+    <p>{{error.message}}</p>
   </div>
   <div v-else-if="!movie">
     <h2>Loading...</h2>
