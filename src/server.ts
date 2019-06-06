@@ -9,7 +9,6 @@ const RANKING = {
   GENRE_WEIGHT: 2,
   SAMPLE_SIZE: 15,
 };
-const MEANINGFUL_JOBS = ['director', 'producer', 'writer'];
 const PORT = process.env.PORT || 8080;
 const PRODUCTION = process.env.NODE_ENV === 'production';
 import * as path from 'path';
@@ -133,28 +132,24 @@ function weightAge(nthBack: number, length: number): number {
 }
 
 // Filters, reasons
-async function getFullCredit(basicCredit: BasicCredit): Promise<FullCredit> {
-  return {
-    ...basicCredit,
-    ...await db.get(`
-SELECT people.name, credits.job FROM credits
-INNER JOIN people ON people.person_id = credits.person_id
-WHERE credit_id = ?
-    `, basicCredit.credit_id)
-  };
-}
 async function getMeaningfulCrewMembers(movie: Movie): Promise<FullCredit[]> {
-  let allCrew = movie.credits.filter(c => c.credit_type === 'crew');
-  let fullCredits = await Promise.all(allCrew.map(getFullCredit));
-  fullCredits = fullCredits.filter(c => MEANINGFUL_JOBS.includes(c.job.toLowerCase()));
-  return fullCredits;
+  return db.all(`
+  SELECT * FROM credits
+  INNER JOIN people ON people.person_id = credits.person_id
+  WHERE credit_type = "crew" AND LOWER(job) = "director" AND movie_id = ?
+  `, movie.movie_id);
 }
 async function getMeaningfulCastMembers(movie: Movie): Promise<FullCredit[]> {
-  let allCrew = movie.credits.filter(c => c.credit_type === 'cast');
-  let fullCredits = await Promise.all(allCrew.map(getFullCredit));
-  fullCredits.sort((a, b) => <number>a.credit_order - <number>b.credit_order); // Ascending order
-  let count = 5 + Math.floor(fullCredits.length * 0.1); // Get the most interesting credits only
-  return fullCredits.slice(0, count);
+  // TODO trial sort and limit, rather than count and cap
+  let credit_count = (await db.get(`SELECT COUNT(*) FROM credits
+  WHERE credit_type = 'cast' AND movie_id = ?
+  `, movie.movie_id))['COUNT(*)'];
+  let orderMax = 5 + Math.floor(Math.log(credit_count)); // Get the most interesting credits only
+  return  await db.all(`
+  SELECT * FROM credits
+  INNER JOIN people ON people.person_id = credits.person_id
+  WHERE credit_type = 'cast' AND credit_order < ? AND movie_id = ?
+  `, orderMax, movie.movie_id);
 }
 async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[]> {
   let allOptions: Filter[] = [];
@@ -258,7 +253,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
     return res.send({
       ...renderableData,
       actions,
-      reasons: []
+      reasons: [],
     } as Response);
   }
 

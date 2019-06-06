@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.5",
     "@types/express": "^4.16.1",
-    "@types/node": "^12.0.2",
+    "@types/node": "^12.0.5",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1",
     "vrsource-tslint-rules": "^6.0.0"
