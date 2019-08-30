@@ -238,7 +238,8 @@ type ExpressResponse = express.Response & {
 app.options('/movie', cors());
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   const DEBUG = !!req.query.debug;
-  if (!validateBody(req.body)) {
+  const body = req.body || {preferences: []};
+  if (!validateBody(body)) {
     return res.status(400).send({
       error: 'malformed',
       message: 'The body provided must be a JSON object in the correct format'
@@ -246,7 +247,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   }
 
   // Skip the sorting logic if no prefs are set, just spit out a random movie
-  if (!req.body.preferences.length) {
+  if (!body.preferences.length) {
     let movie = (await getRandomMovies(1))[0];
     const renderableData = await movie.getRenderableData({credits: false});
     const actions = await generateFilters(movie, []);
@@ -257,7 +258,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
     } as Response);
   }
 
-  const prefs: Pref[] = req.body.preferences.map((pref: UserPref) => {
+  const prefs: Pref[] = body.preferences.map((pref: UserPref) => {
     return {
       added: new Date(pref.added),
       direction: pref.direction,
