@@ -1,4 +1,4 @@
-(async function main() {
+(function main() {
   const SOURCE_PAGE_BASE = 'https://www.themoviedb.org/movie/';
   const POSTER_BASE = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2';
   const QUERY = new URLSearchParams(window.location.search);
@@ -71,8 +71,8 @@
       togglePoster() {
         this.poster = !this.poster;
       },
-      async reload() {
-        await this.loadMovie();
+      reload() {
+        this.loadMovie();
       },
       savePreference(action) {
         let existingPref = preferences.find(filter => filter.type === action.type && filter.id === action.id);
@@ -87,35 +87,38 @@
         });
         this.savePreferences();
       },
-      async loadMovie() {
-        try {
-          let movie = await this.fetchMovie();
-          movie.link = SOURCE_PAGE_BASE + movie.movie_id;
-          movie.actions.map(action => {
-            action.text = this.makeActionText(action);
+      loadMovie() {
+        this.fetchMovie()
+          .then((movie) => {
+            movie.link = SOURCE_PAGE_BASE + movie.movie_id;
+            movie.actions.map(action => {
+              action.text = this.makeActionText(action);
+            });
+            movie.poster_url = POSTER_BASE + movie.poster_url;
+            movie.reasonText = this.makeReasonText(movie.reasons);
+            movie.release_date = new Date(movie.release_date);
+            this.movie = movie;
+          })
+          .catch(e => {
+            this.error = {
+              title: 'Unexpected Error',
+              message: e.message
+            }
           });
-          movie.poster_url = POSTER_BASE + movie.poster_url;
-          movie.reasonText = this.makeReasonText(movie.reasons);
-          movie.release_date = new Date(movie.release_date);
-          this.movie = movie;
-        } catch(e) {
-          this.error = {
-            title: 'Unexpected Error',
-            message: e.message
-          }
-        }
       },
-      async fetchMovie() {
-        let res = await fetch('/movie' + (FLAGS.debug ? '?debug=true' : ''), {
+      fetchMovie() {
+        return fetch('/movie' + (FLAGS.debug ? '?debug=true' : ''), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({preferences})
-        });
-        if(!res.ok) throw new Error(res.statusCode + ': Something went wrong.');
-        return res.json();
+        })
+          .then(res => {
+            if(!res.ok) throw new Error(res.statusCode + ': Something went wrong.');
+            return res.json();
+          });
       },
       makeReasonText(reasons) {
         let pos = reasons.filter(r => r.direction === 1);
@@ -179,6 +182,6 @@
     document.title = conditionalFilter(document.title);
   setTimeout(() => loaded(), 0);
   if(!app.error) { // If it hasn't already failed
-    await app.loadMovie();
+    app.loadMovie();
   }
 })();
