@@ -298,6 +298,7 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(ROOT +  '/static/index.html');
 });
+app.get('/favicon.ico', (r, res) => res.redirect('/static/icon_tiny.png'));
 app.use('/static', express.static(ROOT + '/static'));
 
 app.use(Sentry.Handlers.errorHandler());
