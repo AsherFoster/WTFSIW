@@ -25,7 +25,7 @@
         '$ is the best fucking type of movie!'
       ],
       cast: [
-        '$ is hot as fuck!'
+        '$ is hot as fuck!',
       ],
       crew: [
         '$ makes the best movies!',
@@ -106,24 +106,26 @@
             }
           });
       },
-      async fetchMovie() {
-        const res = await fetch('/movie' + (FLAGS.debug ? '?debug=true' : ''), {
+      fetchMovie() {
+        return fetch('/movie' + (FLAGS.debug ? '?debug=true' : ''), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({preferences})
-        });
-        if(!res.ok) throw new Error(res.statusCode + ': Something went wrong.');
-        return res.json();
+        })
+          .then(res => {
+            if(!res.ok) throw new Error(res.statusCode + ': Something went wrong.');
+            return res.json();
+          });
       },
       makeReasonText(reasons) {
         let pos = reasons.filter(r => r.direction === 1);
         if (!pos.length)
           return null;
         else
-          return 'like ' + pos.map(f => f.name).join(', ');
+          return 'love ' + pos.map(f => f.name).join(', ');
       },
       makeActionText({type, name, direction, job}) {
         let filterTypes = direction === 1 ? filters.positive : filters.negative;

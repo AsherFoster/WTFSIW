@@ -16,6 +16,7 @@ before_deploy:
 - mkdir data
 - gsutil cp gs://wtfsiw-database/db.sqlite data/db.sqlite
 
+# Yes, it installs gcloud twice. No, I can't  be bothered fixing it
 deploy:
   provider: gae
   skip_cleanup: true
