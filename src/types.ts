@@ -1,10 +1,9 @@
-
 export namespace Database {
   export type Movie = {
     movie_id: number,
     title: string,
     overview: string,
-    poster_url: string|null,
+    poster_url: string | null,
     release_date: string,
     average_rating: number
   };
@@ -16,14 +15,14 @@ export namespace Database {
     genre_id: number,
     movie_id: number
   };
-  export type CreditType = 'cast'|'crew';
+  export type CreditType = 'cast' | 'crew';
   export type Credit = {
     credit_id: string,
     person_id: number,
     movie_id: number,
     credit_type: CreditType,
     job: string,
-    credit_order: number|null
+    credit_order: number | null
   };
   export type Person = {
     person_id: number,

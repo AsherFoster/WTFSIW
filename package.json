@@ -4,8 +4,8 @@
   "description": "What the fuck should you watch?",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "build": "tsc",
+    "start": "node dist/index.js",
+    "build": "tsc && babel static/app.js -o static/app.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,9 +27,13 @@
     "sqlite": "^3.0.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.2",
     "@types/node": "^12.12.17",
+    "babel-preset-minify": "^0.5.1",
     "tslint": "^5.20.1",
     "typescript": "^3.7.3",
     "vrsource-tslint-rules": "^6.0.0"

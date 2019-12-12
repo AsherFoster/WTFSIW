@@ -4,30 +4,26 @@ and I'm not putting in the effort of moving stuff out of here
 * */
 const RANKING = {
   AGE_WEIGHT_FACTOR: 0.1,
-  CAST_WEIGHT: 2,
-  CREW_WEIGHT: 2,
-  GENRE_WEIGHT: 2,
+  CAST_WEIGHT: 3,
+  CREW_WEIGHT: 3,
+  GENRE_WEIGHT: 4,
   SAMPLE_SIZE: 15,
 };
-const PORT = process.env.PORT || 8080;
+
 const PRODUCTION = process.env.NODE_ENV === 'production';
 import * as path from 'path';
 import * as Sentry from '@sentry/node';
-import * as sqlite from 'sqlite';
 import * as express from 'express';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
+import db from './database';
+import Movie from './movie';
+import {GENRE_NAMES} from './database';
 
-Sentry.init({dsn: process.env.SENTRY_DSN});
-
-import Movie, {BasicCredit, FullCredit} from './movie';
-import {Database} from './types';
 
 const app = express();
-const dbPromise = sqlite.open(path.resolve(__dirname, '../data/db.sqlite'));
+
 const ROOT = path.resolve(__dirname, '..');
-let db: sqlite.Database;
-let GENRE_NAMES = new Map<number, string>();
 
 type FilterType = 'crew' | 'cast' | 'genre';
 type Filter = {
@@ -66,8 +62,7 @@ function validateBody(body: any) {
     return false;
   }
   return body.preferences.every((pref: any) => {
-    // For some reason typescript things that `any` has a added type that's simultaneously a string and a number
-    // noinspection SuspiciousTypeOfGuard
+    // For some reason typescript thinks that `any` has a added type that's simultaneously a string and a number
     return typeof pref.added === 'string' &&
       // @ts-ignore
       !isNaN(new Date(pref.added)) &&
@@ -76,13 +71,11 @@ function validateBody(body: any) {
       [-1, 1].includes(pref.direction);
   });
 }
-async function loadGenres() {
-  let dbGenres = await db.all('SELECT * FROM genres') as Database.Genre[]; // It's pretty small, no big deal
-  dbGenres.forEach(({genre_id, name}) => GENRE_NAMES.set(genre_id, name));
-}
+
 async function getRandomMovies(n = 1) {
   let ids = await db.all(`SELECT movie_id FROM movies ORDER BY RANDOM() LIMIT ?`, n) as { movie_id: number }[];
-  return Promise.all(ids.map(({movie_id}) => Movie._load(db, GENRE_NAMES, movie_id)));
+  // Cast is safe, because we're retrieving by ids which we just fetched
+  return Promise.all(ids.map((m) => Movie._load(m.movie_id) as Promise<Movie>));
 }
 
 // Ranking
@@ -132,25 +125,6 @@ function weightAge(nthBack: number, length: number): number {
 }
 
 // Filters, reasons
-async function getMeaningfulCrewMembers(movie: Movie): Promise<FullCredit[]> {
-  return db.all(`
-  SELECT * FROM credits
-  INNER JOIN people ON people.person_id = credits.person_id
-  WHERE credit_type = "crew" AND LOWER(job) = "director" AND movie_id = ?
-  `, movie.movie_id);
-}
-async function getMeaningfulCastMembers(movie: Movie): Promise<FullCredit[]> {
-  // TODO trial sort and limit, rather than count and cap
-  let credit_count = (await db.get(`SELECT COUNT(*) FROM credits
-  WHERE credit_type = 'cast' AND movie_id = ?
-  `, movie.movie_id))['COUNT(*)'];
-  let orderMax = 5 + Math.floor(Math.log(credit_count)); // Get the most interesting credits only
-  return  await db.all(`
-  SELECT * FROM credits
-  INNER JOIN people ON people.person_id = credits.person_id
-  WHERE credit_type = 'cast' AND credit_order < ? AND movie_id = ?
-  `, orderMax, movie.movie_id);
-}
 async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[]> {
   let allOptions: Filter[] = [];
   movie.genres.forEach(g => {
@@ -162,7 +136,7 @@ async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[
       type: 'genre'
     });
   });
-  (await getMeaningfulCrewMembers(movie)).forEach(crew => {
+  (await movie.getMeaningfulCrewMembers()).forEach(crew => {
     allOptions.push({
       direction: Math.random() > 0.5 ? -1 : 1,
       id: crew.person_id,
@@ -171,7 +145,7 @@ async function generateFilters(movie: Movie, prefs: UserPref[]): Promise<Filter[
       type: 'crew'
     });
   });
-  (await getMeaningfulCastMembers(movie)).forEach(cast => {
+  (await movie.getMeaningfulCastMembers()).forEach(cast => {
     allOptions.push({
       direction: Math.random() > 0.5 ? -1 : 1,
       id: cast.person_id,
@@ -213,13 +187,6 @@ async function generateReasons(scores: Ranking[]): Promise<Filter[]> {
     }));
 }
 
-app.use(Sentry.Handlers.requestHandler());
-app.get('/movie', async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  let movie = (await getRandomMovies(1))[0];
-  res.send(await movie.getRenderableData());
-});
-
 type PostData = {
   preferences: UserPref[]
 };
@@ -233,9 +200,16 @@ type Response = {
   _debug?: any
 };
 type ExpressResponse = express.Response & {
-  sentry: string
+  sentry?: string
 };
+
+app.use(Sentry.Handlers.requestHandler());
 app.options('/movie', cors());
+app.get('/movie', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  let movie = (await getRandomMovies(1))[0];
+  res.send(await movie.getRenderableData());
+});
 app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   const DEBUG = !!req.query.debug;
   const body = req.body || {preferences: []};
@@ -294,10 +268,25 @@ app.post('/movie', cors(), bodyParser.json(), async (req, res) => {
   }
   res.send(response);
 });
+app.get('/movie/:id', async (req, res: ExpressResponse) => {
+  const movie = await Movie._load(+req.params.id);
+  if (!movie) {
+    return res.status(404).json({
+      error: 'not-found',
+      message: 'The movie you requested couldn\'t be found'
+    });
+  } else {
+    res.send({
+      ...await movie.getRenderableData(),
+      actions: await generateFilters(movie, [])
+    });
+  }
+});
 
 app.get('/', (req, res) => {
   res.sendFile(ROOT +  '/static/index.html');
 });
+app.get('/app.js', (req, res) => res.sendFile(ROOT + (PRODUCTION ? '/static/app.min.js' : '/static/app.js')));
 app.get('/favicon.ico', (r, res) => res.redirect('/static/icon_tiny.png'));
 app.use('/static', express.static(ROOT + '/static'));
 
@@ -314,11 +303,4 @@ app.use((err: Error, req: express.Request, res: ExpressResponse, next: express.N
   });
 });
 
-async function main() {
-  db = await dbPromise;
-  await loadGenres();
-  app.listen(PORT);
-  console.log('Listening on port', PORT);
-}
-
-main();
+export default app;

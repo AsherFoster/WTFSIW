@@ -24,10 +24,11 @@
   <div v-if="!error && movie" class="suggestion">
     <h2>{{movie.title | conditionalFilter}}</h2>
     <p class="description">
-      {{movie.overview | trim(400)}} -&nbsp;<a :href="movie.link">TMDb</a>
+      {{movie.overview | trim(400)}} -&nbsp;<a :href="movie.link">View on TMDb</a>
     </p>
     <div class="actions">
       <a href="#" @click="savePreference(action); reload()" v-for="action of movie.actions">{{action.text}}</a>
+      <br>
       <a href="#" @click="reload()">Just give me another {{fuck}}ing movie!</a>
     </div>
     <footer class="footer">
@@ -54,7 +55,7 @@
     <h2>Loading...</h2>
   </div>
 </div>
-<script src="/static/app.js"></script>
+<script src="/static/app.min.js"></script>
 <script>
   (function(a,b,c){var d=a.history,e=document,f=navigator||{},g=localStorage,
     h=encodeURIComponent,i=d.pushState,k=function(){return Math.random().toString(36)},

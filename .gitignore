@@ -1,6 +1,7 @@
 .idea
 dist
 data
+static/*.min.js
 
 # Created by .ignore support plugin (hsz.mobi)
 ### macOS template
