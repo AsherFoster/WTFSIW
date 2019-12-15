@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc && babel static/app.js -o static/app.min.js",
+    "build": "tsc && gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
