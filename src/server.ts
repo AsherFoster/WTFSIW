@@ -284,11 +284,11 @@ app.get('/movie/:id', async (req, res: ExpressResponse) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(ROOT +  '/static/index.html');
+  res.sendFile(ROOT +  '/static_out/index.html');
 });
-app.get('/app.js', (req, res) => res.sendFile(ROOT + (PRODUCTION ? '/static/app.min.js' : '/static/app.js')));
-app.get('/favicon.ico', (r, res) => res.redirect('/static/icon_tiny.png'));
-app.use('/static', express.static(ROOT + '/static'));
+app.get('/favicon.ico', (r, res) => res.redirect('/static_out/icon_tiny.png'));
+app.get('/static/app.js', (req, res) => res.sendFile(ROOT + (PRODUCTION ? '/static_out/app.js' : '/static/app.js')));
+app.use('/static', express.static(ROOT + '/static_out'));
 
 app.use(Sentry.Handlers.errorHandler());
 // @ts-ignore really not sure why it's complaining

@@ -1,11 +1,12 @@
 (function main() {
   const SOURCE_PAGE_BASE = 'https://www.themoviedb.org/movie/';
-  const POSTER_BASE = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2';
-  const QUERY = new URLSearchParams(window.location.search);
-  const FLAGS = {
-    debug: QUERY.get('debug'),
-    safe: QUERY.get('safe')
-  };
+  const QUERIES = window.location.search.substr(1).split('&');
+  const FLAGS = {};
+  QUERIES.forEach((s) => {
+    const [name, val] = s.split('=');
+    FLAGS[name] = val !== 'false'
+  });
+
   const FUCK = FLAGS.safe ? 'heck' : 'fuck';
   const titles = [
     'What should I fucking watch?!',
@@ -55,9 +56,8 @@
     data: {
       title: conditionalFilter(pickRandom(titles)),
       movie: null,
-      poster: false,
       error: !(
-        "fetch" in window &&
+        "Promise" in window &&
         "localStorage" in window
       ) ? {
         title: 'Your device is ancient as ' + FUCK,
@@ -68,9 +68,6 @@
       fuck: FUCK
     },
     methods: {
-      togglePoster() {
-        this.poster = !this.poster;
-      },
       reload() {
         this.loadMovie();
       },
@@ -94,7 +91,6 @@
             movie.actions.map(action => {
               action.text = this.makeActionText(action);
             });
-            movie.poster_url = POSTER_BASE + movie.poster_url;
             movie.reasonText = this.makeReasonText(movie.reasons);
             movie.release_date = new Date(movie.release_date);
             this.movie = movie;
