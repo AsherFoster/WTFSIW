@@ -20,6 +20,7 @@
     Sentry.init({ dsn: 'https://d86a405cbf3242aaaac3a3ff2416d04a@sentry.io/1470209' });
     // Load fetch polyfill synchronously if required (Don't touch my fucking performance on evergreen browsers)
     if (!window.fetch) document.write('<script src="static/fetch_polyfill.js"><\/script>');
+    if (!window.Promise) document.write('<script src="//cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>');
     (function(a,b,c){var d=a.history,e=document,f=navigator||{},g=localStorage,
             h=encodeURIComponent,i=d.pushState,k=function(){return Math.random().toString(36)},
             l=function(){return g.cid||(g.cid=k()),g.cid},m=function(r){var s=[];for(var t in r)

@@ -57,7 +57,6 @@
       title: conditionalFilter(pickRandom(titles)),
       movie: null,
       error: !(
-        "Promise" in window &&
         "localStorage" in window
       ) ? {
         title: 'Your device is ancient as ' + FUCK,
