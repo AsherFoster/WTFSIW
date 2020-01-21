@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/asherfoster/wftsiw#readme",
   "dependencies": {
-    "@sentry/node": "^5.10.2",
+    "@sentry/node": "^5.11.1",
     "body-parser": "^1.19.0",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",

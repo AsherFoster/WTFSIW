@@ -13,12 +13,13 @@
   <meta name="twitter:site" content="asherfoster"/>
   <link href="//fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
   <link href="/static/styles.css" rel="stylesheet">
-  <script src="//browser.sentry-cdn.com/5.10.2/bundle.min.js"
-          integrity="sha384-ssBfXiBvlVC7bdA/VX03S88B5MwXQWdnpJRbUYFPgswlOBwETwTp6F3SMUNpo9M9"
+  <script
+          src="https://browser.sentry-cdn.com/5.11.1/bundle.min.js"
+          integrity="sha384-r7/ZcDRYpWjCNXLUKk3iuyyyEcDJ+o+3M5CqXP5GUGODYbolXewNHAZLYSJ3ZHcV"
           crossorigin="anonymous"></script>
   <script>
     Sentry.init({ dsn: 'https://d86a405cbf3242aaaac3a3ff2416d04a@sentry.io/1470209' });
-    // Load fetch polyfill synchronously if required (Don't touch my fucking performance on evergreen browsers)
+    // Load fetch polyfill synchronously if required (To not affect performance on evergreen browsers)
     if (!window.fetch) document.write('<script src="static/fetch_polyfill.js"><\/script>');
     if (!window.Promise) document.write('<script src="//cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>');
     (function(a,b,c){var d=a.history,e=document,f=navigator||{},g=localStorage,
