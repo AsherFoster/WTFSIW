@@ -9,7 +9,6 @@ const dbPromise = sqlite.open(BASE_DIR + '/db.sqlite');
 let db: sqlite.Database;
 let addedPeople = new Set();
 
-
 function sleep(ms: number) {
   return new Promise(resolve => {
     setTimeout(() => resolve(), ms);
@@ -53,16 +52,18 @@ async function createDb() {
   );`);
 }
 async function doesDbExist() {
-  return !!(await db.get('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\'movies\''));
+  return !!(await db.get(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='movies'"
+  ));
 }
 
 async function importGenres() {
   const {genres} = require('../genres') as {genres: API.Genre[]};
 
-  const insert = await db.prepare(`INSERT INTO genres(genre_id, name) VALUES (?, ?)`);
-  await Promise.all(genres.map(genre =>
-    insert.run(genre.id, genre.name)
-  ));
+  const insert = await db.prepare(
+    `INSERT INTO genres(genre_id, name) VALUES (?, ?)`
+  );
+  await Promise.all(genres.map(genre => insert.run(genre.id, genre.name)));
   insert.finalize();
 
   // Verify it worked
@@ -71,11 +72,19 @@ async function importGenres() {
 }
 async function importMovie({discover: movie, cast, crew}: DataDump) {
   let date = new Date(movie.release_date || 0);
-  await db.run('INSERT INTO movies(movie_id, title, overview, poster_url, average_rating, release_date) VALUES (?, ?, ?, ?)', [
-    movie.id, movie.title, movie.overview, movie.poster_path, movie.vote_average, date
-  ]);
-  if(cast) await Promise.all(cast.map(c => importCast(c, movie.id)));
-  if(crew) await Promise.all(crew.map(c => importCrew(c, movie.id)));
+  await db.run(
+    'INSERT INTO movies(movie_id, title, overview, poster_url, average_rating, release_date) VALUES (?, ?, ?, ?)',
+    [
+      movie.id,
+      movie.title,
+      movie.overview,
+      movie.poster_path,
+      movie.vote_average,
+      date,
+    ]
+  );
+  if (cast) await Promise.all(cast.map(c => importCast(c, movie.id)));
+  if (crew) await Promise.all(crew.map(c => importCrew(c, movie.id)));
 
   await Promise.all(movie.genre_ids.map(g => linkGenre(movie.id, g)));
 }
@@ -86,7 +95,7 @@ function importCast(cast: API.Cast, movieId: number) {
     movie_id: movieId,
     job: cast.character,
     credit_type: 'cast',
-    name: cast.name
+    name: cast.name,
   });
 }
 function importCrew(crew: API.Crew, movieId: number) {
@@ -96,31 +105,47 @@ function importCrew(crew: API.Crew, movieId: number) {
     movie_id: movieId,
     job: crew.job,
     credit_type: 'crew',
-    name: crew.name
+    name: crew.name,
   });
 }
 async function importPerson(credit: any) {
   await db.run('INSERT INTO credits VALUES (?, ?, ?, ?, ?)', [
-    credit.id, credit.person_id, credit.job, credit.credit_type, credit.movie_id
+    credit.id,
+    credit.person_id,
+    credit.job,
+    credit.credit_type,
+    credit.movie_id,
   ]);
-  if(!addedPeople.has(credit.person_id)) {
+  if (!addedPeople.has(credit.person_id)) {
     // addedPeople.
     db.run('INSERT INTO people VALUES (?, ?)', credit.person_id, credit.name);
   }
 }
 function linkGenre(movieId: number, genreId: number) {
-  return db.run('INSERT INTO genre_links(movie_id, genre_id) VALUES (?, ?)', movieId, genreId);
+  return db.run(
+    'INSERT INTO genre_links(movie_id, genre_id) VALUES (?, ?)',
+    movieId,
+    genreId
+  );
 }
 
 async function main() {
   db = await dbPromise;
-  if(await doesDbExist()) {
+  if (await doesDbExist()) {
     console.error(`!!*********************************************************!!
 !!  This script will destroy the database in 2 seconds...  !!
 !!*********************************************************!!`);
     await sleep(2000);
-    const tablesToDelete = ['movies', 'genres', 'genre_links', 'people', 'credits'];
-    await Promise.all(tablesToDelete.map(t => db.run(`DROP TABLE IF EXISTS ${t}`)));
+    const tablesToDelete = [
+      'movies',
+      'genres',
+      'genre_links',
+      'people',
+      'credits',
+    ];
+    await Promise.all(
+      tablesToDelete.map(t => db.run(`DROP TABLE IF EXISTS ${t}`))
+    );
   }
 
   await createDb();
@@ -129,13 +154,17 @@ async function main() {
   await importGenres();
   console.log('Genres imported!');
 
-  for(let i = 0; i < movies.length; i++) {
+  for (let i = 0; i < movies.length; i++) {
     let movie = movies[i];
     try {
       await importMovie(movie);
       console.log(`√ #${i} ${movie.discover.id}`);
-    } catch(e) {
-      console.error(`X Failed to import ${movie.discover.id} ${movie.discover.title}\n`, e, e.stack);
+    } catch (e) {
+      console.error(
+        `X Failed to import ${movie.discover.id} ${movie.discover.title}\n`,
+        e,
+        e.stack
+      );
     }
   }
   console.log('Movies imported!');

@@ -15,10 +15,14 @@ export async function getMovies(amount: number): Promise<MovieResult[]> {
   while (movies.length < amount) {
     page++;
     const resp = await client.discoverMovie({
-      page
+      page,
       // TODO additional filtering?
     });
-    if (!resp.total_pages || !resp.results?.length || resp.total_pages <= page) {
+    if (
+      !resp.total_pages ||
+      !resp.results?.length ||
+      resp.total_pages <= page
+    ) {
       return movies; // No more results
     }
     movies.push(...resp.results);
@@ -36,7 +40,7 @@ export async function getMovieCredits(movie: number): Promise<CastAndCrew> {
 
   return {
     cast: resp.cast,
-    crew: resp.crew
+    crew: resp.crew,
   };
 }
 
@@ -45,4 +49,3 @@ export async function getGenres(): Promise<Genre[]> {
   if (!resp.genres) throw new Error('No genres returned');
   return resp.genres;
 }
-

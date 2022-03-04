@@ -9,9 +9,7 @@ module.exports = {
     // @typescript-eslint/recommended-requiring-type-checking
   ],
   rules: {
-    // todo @typescript-eslint/member-delimiter-style
-    // '@typescript-eslint/object-curly-spacing': 0,
-    // 'object-curly-spacing': 0,
+    curly: ['error', 'multi-line'],
     "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
     '@typescript-eslint/prefer-function-type': ['error']
   },

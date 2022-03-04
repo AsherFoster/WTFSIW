@@ -5,18 +5,22 @@ import type {RankingPreference} from './Scoring';
 // General Response helpers
 const baseHeaders = {'Content-Type': 'application/json'};
 
-export function createResponse<T>(body: T, status = 200, headers?: Record<string, string>): Response {
+export function createResponse<T>(
+  body: T,
+  status = 200,
+  headers?: Record<string, string>
+): Response {
   return new Response(JSON.stringify(body), {
     headers: {...baseHeaders, ...headers},
-    status
+    status,
   });
 }
 
 // Error Response
 const statusCodes = {
-  'ERR_BAD_REQUEST': 400,
-  'ERR_NOT_FOUND': 404,
-  'ERR_INTERNAL_ERROR': 500
+  ERR_BAD_REQUEST: 400,
+  ERR_NOT_FOUND: 404,
+  ERR_INTERNAL_ERROR: 500,
 } as const;
 export type ErrorCode = keyof typeof statusCodes;
 export interface ErrorResponse {
@@ -24,11 +28,17 @@ export interface ErrorResponse {
   message: string;
 }
 
-export function createErrorResponse(error: ErrorCode, message: string): Response {
-  return createResponse<ErrorResponse>({
-    error,
-    message
-  }, statusCodes[error]);
+export function createErrorResponse(
+  error: ErrorCode,
+  message: string
+): Response {
+  return createResponse<ErrorResponse>(
+    {
+      error,
+      message,
+    },
+    statusCodes[error]
+  );
 }
 
 // Specific API response types
@@ -38,7 +48,7 @@ async function getCreditWithPerson(credit: Credit): Promise<CreditWithPerson> {
     job: credit.job,
     creditType: credit.creditType,
     creditNumber: credit.creditNumber,
-    person: await getPerson(credit.personId)
+    person: await getPerson(credit.personId),
   };
 }
 
@@ -63,7 +73,7 @@ export async function getClientMovie(movie: Movie): Promise<ClientMovie> {
     averageRating: movie.averageRating,
 
     genres: await Promise.all(movie.genres.map(g => getGenre(g))),
-    credits: await Promise.all(movie.credits.map(c => getCreditWithPerson(c)))
+    credits: await Promise.all(movie.credits.map(c => getCreditWithPerson(c))),
   };
 }
 

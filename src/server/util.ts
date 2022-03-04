@@ -5,7 +5,9 @@ export function assertNever(n: never): never {
 /** Randomly pick a item from `src`, biased towards the start */
 export function weightedSample<T>(src: T[]): T {
   // TODO confirm this curve
-  const weightedRandom = Math.floor(src.length - Math.sqrt(Math.random() * (src.length ** 2)));
+  const weightedRandom = Math.floor(
+    src.length - Math.sqrt(Math.random() * src.length ** 2)
+  );
 
   return src[weightedRandom];
 }

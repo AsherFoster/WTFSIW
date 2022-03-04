@@ -4,7 +4,11 @@ import {generateActions, getScoredMovie} from '../scoring';
 import {getRandomMovies} from '../data';
 import {preferenceListSchema} from '../../types/clientapi/Request';
 import type {RankedMovieResponse} from '../../types/clientapi/Response';
-import {createErrorResponse, createResponse, getClientMovie} from '../../types/clientapi/Response';
+import {
+  createErrorResponse,
+  createResponse,
+  getClientMovie,
+} from '../../types/clientapi/Response';
 
 const ajv = new Ajv();
 const parse = ajv.compileParser(preferenceListSchema);
@@ -14,7 +18,7 @@ async function returnRandomMovie(): Promise<Response> {
 
   return createResponse<RankedMovieResponse>({
     movie: await getClientMovie(movie),
-    actions: await generateActions(movie, [])
+    actions: await generateActions(movie, []),
   });
 }
 
@@ -26,7 +30,10 @@ export const ScoredMovie = async (request: Request) => {
 
   const prefs = parse(prefString);
   if (!prefs) {
-    return createErrorResponse('ERR_BAD_REQUEST', parse.message || 'Unable to parse prefs');
+    return createErrorResponse(
+      'ERR_BAD_REQUEST',
+      parse.message || 'Unable to parse prefs'
+    );
   }
 
   if (!prefs.length) {
@@ -38,6 +45,6 @@ export const ScoredMovie = async (request: Request) => {
   return createResponse<RankedMovieResponse>({
     movie: await getClientMovie(movie),
     actions: await generateActions(movie, prefs),
-    rankingInfo: factors
+    rankingInfo: factors,
   });
 };

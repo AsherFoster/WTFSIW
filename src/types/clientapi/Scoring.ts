@@ -8,15 +8,15 @@ export interface PersonPreference {
 const personPreferenceSchema: JTDSchemaType<PersonPreference> = {
   properties: {
     type: {
-      enum: ['person']
+      enum: ['person'],
     },
     personId: {
-      type: 'int32'
+      type: 'int32',
     },
     weight: {
-      type: 'int32'
-    }
-  }
+      type: 'int32',
+    },
+  },
 };
 
 export interface GenrePreference {
@@ -27,15 +27,15 @@ export interface GenrePreference {
 const genrePreferenceSchema: JTDSchemaType<GenrePreference> = {
   properties: {
     type: {
-      enum: ['genre']
+      enum: ['genre'],
     },
     genreId: {
-      type: 'int32'
+      type: 'int32',
     },
     weight: {
-      type: 'int32'
-    }
-  }
+      type: 'int32',
+    },
+  },
 };
 
 export type RankingPreference = GenrePreference | PersonPreference;
@@ -43,6 +43,6 @@ export const rankingPreferenceSchema: JTDSchemaType<RankingPreference> = {
   discriminator: 'type',
   mapping: {
     person: personPreferenceSchema,
-    genre: genrePreferenceSchema
-  }
+    genre: genrePreferenceSchema,
+  },
 };

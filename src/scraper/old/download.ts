@@ -3,7 +3,7 @@ const CONFIG = {
   apiKey: process.env.TMDB_API_KEY,
   apiBase: 'https://api.themoviedb.org/3',
   outputFile: 'movies.json',
-  genresFile: 'genres.json'
+  genresFile: 'genres.json',
 };
 
 import * as https from 'https';
@@ -29,37 +29,41 @@ async function main() {
   fs.writeFileSync(CONFIG.genresFile, JSON.stringify(genres));
 }
 async function getDiscoverPage(page: number) {
-  const resp = await apiGet(`/discover/movie`, {
+  const resp = (await apiGet(`/discover/movie`, {
     sort_by: 'popularity.desc',
-    page
-  }) as {
-    page: number,
-    total_results: number,
-    total_pages: number,
-    results: API.DiscoverMovie[]
+    page,
+  })) as {
+    page: number;
+    total_results: number;
+    total_pages: number;
+    results: API.DiscoverMovie[];
   };
   let movies: DataDump[] = [];
-  if(!resp.results) {
+  if (!resp.results) {
     console.error(resp);
   }
-  await Promise.all(resp.results.map(async (movie) => {
-    movies.push({
-      discover: movie,
-      ...(await getMovieDetails(movie.id))
-    });
-    console.log(`${page}/${movie.id}: ${movie.title}`);
-  }));
+  await Promise.all(
+    resp.results.map(async movie => {
+      movies.push({
+        discover: movie,
+        ...(await getMovieDetails(movie.id)),
+      });
+      console.log(`${page}/${movie.id}: ${movie.title}`);
+    })
+  );
   return {
     movies,
     pagination: {
       page: resp.page,
       total_results: resp.total_results,
-      total_pages: resp.total_pages
-    }
+      total_pages: resp.total_pages,
+    },
   };
 }
 
-async function getMovieDetails(id: number): Promise<{cast: API.Cast[], crew: API.Crew[]}> {
+async function getMovieDetails(
+  id: number
+): Promise<{cast: API.Cast[]; crew: API.Crew[]}> {
   // @ts-ignore
   const {cast, crew} = await apiGet(`/movie/${id}/credits`);
   return {cast, crew};
@@ -71,11 +75,11 @@ async function getGenres() {
 
 /* Simplifies querying the API. Formats the URL and parses the response */
 function _apiGet(method: string, params = {}) {
-  return new Promise(async (resolve) => {
+  return new Promise(async resolve => {
     const url = makeUrl(method, params);
     https.get(url, (res: http.IncomingMessage) => {
       let body = '';
-      res.on('data', chunk => body += chunk);
+      res.on('data', chunk => (body += chunk));
       res.on('end', () => {
         resolve(JSON.parse(body));
       });
@@ -88,14 +92,21 @@ const limiter = new Bottleneck({
   // reservoirIncreaseInterval: 10 * 1000,
   // reservoirIncreaseAmount: 40,
 
-  minTime: 250
+  minTime: 250,
 });
-const apiGet = limiter.wrap(_apiGet) as (method: string, params: object) => Promise<any>;
+const apiGet = limiter.wrap(_apiGet) as (
+  method: string,
+  params: object
+) => Promise<any>;
 
 function makeUrl(method: string, params: {[propKey: string]: any}) {
   params.api_key = CONFIG.apiKey;
   // Handy one liner from https://stackoverflow.com/a/23639793
-  const serializedParams = '?' + Object.entries(params).map(([key, val]) => `${key}=${val}`).join('&');
+  const serializedParams =
+    '?' +
+    Object.entries(params)
+      .map(([key, val]) => `${key}=${val}`)
+      .join('&');
   return CONFIG.apiBase + method + serializedParams;
 }
 
