@@ -10,7 +10,7 @@ import * as https from 'https';
 import * as http from 'http';
 import * as fs from 'fs';
 import Bottleneck from 'bottleneck';
-import {API, DataDump} from '../types';
+import {API, DataDump} from '../../types';
 
 async function main() {
   let {movies} = await getDiscoverPage(1);

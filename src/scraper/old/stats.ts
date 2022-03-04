@@ -1,4 +1,4 @@
-import {API, DataDump} from '../types';
+import {API, DataDump} from '../../types';
 
 const movies: DataDump[] = require('../../data/movies');
 

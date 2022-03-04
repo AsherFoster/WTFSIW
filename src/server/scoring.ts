@@ -2,7 +2,7 @@ import {assertNever, sample, weightedSample} from './util';
 import {getRandomMovies} from './data';
 import type {GenrePreference, PersonPreference, RankingPreference} from '../types/clientapi/Scoring';
 import type {Credit, Movie} from '../types/database';
-import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from './config';
+import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../config';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {

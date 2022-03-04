@@ -1,7 +1,7 @@
 import * as sqlite from 'sqlite';
 import * as path from 'path';
 import * as assert from 'assert';
-import {API, DataDump} from '../types';
+import {API, DataDump} from '../../types';
 
 const movies: DataDump[] = require('../../data/movies.json');
 const BASE_DIR = path.dirname(__filename);
