@@ -22,3 +22,4 @@ deploy:
   skip_cleanup: true
   keyfile: deploy-key.json
   project: wtfsiw
+  on: main
