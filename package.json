@@ -29,8 +29,6 @@
     "@sentry/browser": "^6.17.9",
     "@sentry/node": "^6.17.9",
     "ajv": "^8.10.0",
-    "itty-router": "^2.4.10",
-    "sqlite": "^4.0.23",
-    "sqlite3": "^5.0.2"
+    "itty-router": "^2.4.10"
   }
 }

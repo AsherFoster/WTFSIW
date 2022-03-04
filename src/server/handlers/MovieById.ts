@@ -1,12 +1,18 @@
+import {Request} from 'itty-router';
 import {createMovieResponse} from '../MovieResponse';
 import {getMovie} from '../data';
+import {createErrorResponse, createResponse, MovieResponse} from '../../types/clientapi/Response';
 
 export const MovieById = async (request: Request) => {
-  const movie = await getMovie(request.params.id);
-  const resp = {
-    movie: await createMovieResponse(movie)
-  };
+  const idStr = request.params?.id;
+  if (!idStr || !idStr.match(/^\d+$/)) return createErrorResponse('ERR_BAD_REQUEST', 'Invalid ID');
+  const id = parseInt(idStr);
 
-  const headers = {'Content-Type': 'application/json'};
-  return new Response(JSON.stringify(resp), {headers});
+  const movie = await getMovie(id);
+
+  if (!movie) return createErrorResponse('ERR_NOT_FOUND', 'Movie not found');
+
+  return createResponse<MovieResponse>({
+    movie: await createMovieResponse(movie)
+  });
 };

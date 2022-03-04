@@ -1,43 +1,8 @@
-import {Credit, Movie} from '../data/model';
-import {assertNever} from './util';
+import {assertNever, sample, weightedSample} from './util';
 import {getRandomMovies} from './data';
-
-const INITIAL_SAMPLE_SIZE = 100;
-const SUGGESTED_ACTION_COUNT = 3;
-
-/** Randomly pick a item from `src`, biased towards the start */
-function weightedSample<T>(src: T[]): T {
-  // TODO confirm this curve
-  const weightedRandom = Math.floor(src.length - Math.sqrt(Math.random() * (src.length ** 2)));
-
-  return src[weightedRandom];
-}
-
-/** Randomly pick `n` items from `src` */
-function sample<T>(src: T[], n: number): T[] {
-  const arr = [...src];
-  const sampled = [];
-
-  for (let i = 0; i < n && arr.length; i++) {
-    const random = Math.floor(Math.random() * arr.length);
-    sampled.push(arr[random]);
-    arr.splice(random, 1);
-  }
-
-  return sampled;
-}
-
-export interface PersonPreference {
-  type: 'person';
-  personId: number;
-  weight: number;
-}
-export interface GenrePreference {
-  type: 'genre';
-  genreId: number;
-  weight: number;
-}
-export type RankingPreference = GenrePreference | PersonPreference;
+import type {GenrePreference, PersonPreference, RankingPreference} from '../types/clientapi/Scoring';
+import type {Credit, Movie} from '../types/database';
+import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from './config';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {
@@ -104,7 +69,7 @@ function scoreMovie(movie: Movie, prefs: RankingPreference[]): ScoredMovie {
   };
 }
 
-export async function getRankedMovie(prefs: RankingPreference[]): Promise<ScoredMovie> {
+export async function getScoredMovie(prefs: RankingPreference[]): Promise<ScoredMovie> {
   const sampledMovies = await getRandomMovies(INITIAL_SAMPLE_SIZE);
   const scoredMovies = sampledMovies.map(m => scoreMovie(m, prefs)).sort((a, b) => b.score - a.score);
 

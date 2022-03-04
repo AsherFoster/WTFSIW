@@ -9,3 +9,7 @@ if (!allowedEnvironments.includes(ENVIRONMENT)) {
 export const SENTRY_DSN = process.env.SENTRY_DSN;
 export const DATABASE_PATH = path.resolve(__dirname, '../data/db.sqlite');
 export const PORT = process.env.PORT || 8080;
+
+// Scoring algorithm parameters
+export const INITIAL_SAMPLE_SIZE = 100;
+export const SUGGESTED_ACTION_COUNT = 3;

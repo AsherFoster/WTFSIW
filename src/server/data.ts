@@ -1,4 +1,4 @@
-import {Genre, Movie, Person} from '../data/model';
+import type {Genre, Movie, Person} from '../types/database';
 
 export async function getRandomMovies(count: number): Promise<Movie[]> {
   throw new Error('not implemented');
