@@ -1,21 +1,14 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2022",
     "moduleResolution": "node",
-    "target": "es2017",
-    "strict": true,
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
+    "target": "esnext",
     "sourceMap": true,
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "strict": true,
+    "outDir": "dist"
   },
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
-    "node_modules",
-    "dist"
+    "node_modules"
   ]
 }
+

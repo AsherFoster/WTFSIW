@@ -1,4 +1,19 @@
 # What the fuck should I watch?
+
+## 2.0 goals
+- High levels of automation
+  - Build & Deploy
+  - Dataset updates
+  - Dependency upgrades
+- Robust unit tests to back these up
+- Trying out new tools
+  - Prettier
+  - Rounding out my eslint config
+  - Cloudflare workers
+- Doing all of this, while ideally not costing anything
+- Making the most of a common search term with good SEO
+- Privacy-friendly analytics to feed my curiosity
+
 ## Setup
 - Clone the repo
 - `npm i`
@@ -6,16 +21,8 @@
 - Either build the database yourself, or place supplied data files in the `./data` dir
 - `npm start`
 
-## Markers, listen up
-If you're marking this, you probably want to add `?safe=true&debug=true` to the url.
-Because it's a minimal site, the default UI doesn't meet the assessment requirements, so must be flagged.
-
 ## Configuration
-`server.js`
-- `process.env.PORT` is used for the port the server starts on
-
-`download.js`
-- `process.env.TMDB_API_KEY` is used to access the TMDb API
+For runtime config, check out `src/config.ts`
 
 ## Building the DB
 First, download all the required data files with `./scripts/download.js`
