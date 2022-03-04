@@ -1,7 +1,6 @@
 import {RankingPreference, rankingPreferenceSchema} from './Scoring';
 import type {JTDSchemaType} from 'ajv/dist/jtd';
 
-export type RankingPreferenceList = RankingPreference[];
-export const preferenceListSchema: JTDSchemaType<RankingPreferenceList> = {
+export const preferenceListSchema: JTDSchemaType<RankingPreference[]> = {
   elements: rankingPreferenceSchema,
 };

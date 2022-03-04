@@ -5,7 +5,9 @@
     "target": "esnext",
     "sourceMap": true,
     "strict": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "preserve",
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules"

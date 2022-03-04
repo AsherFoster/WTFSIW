@@ -20,8 +20,10 @@
   "homepage": "https://github.com/AsherFoster/WTFSIW#readme",
   "devDependencies": {
     "@asherfoster/eslint-config": "^3.0.0",
-    "@types/node": "^17.0.21",
-    "esbuild": "^0.14.23",
+    "@types/node": "^16.11.26",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.13",
+    "esbuild": "^0.14.25",
     "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.5.1",
@@ -32,6 +34,8 @@
     "@sentry/node": "^6.17.9",
     "ajv": "^8.10.0",
     "itty-router": "^2.4.10",
-    "moviedb-promise": "^3.1.13"
+    "moviedb-promise": "^3.1.13",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }

@@ -1,21 +1,41 @@
-const App = () => (
-  <div id='app' class='wrapper'>
-    <h1>{title}</h1>
-    <hr class='top-hr' />
-    <Movie />
-    <footer class='footer'>
-      <p class='reasoning' v-if='movie.reasonText'>Suggested because you {{movie.reasonText}}</p>
-      <hr class='footer-hr'>
-        <p>
-          <a href='//github.com/asherfoster/wtfsiw'>Github</a> -
-          <a href='//asherfoster.com/things/whatthefuckshouldiwatch'>About</a>
-          {/*<span v-if='!flags.safe'>*/}
-          {/*    - <a href='?safe=true'>Stop fucking swearing</a>*/}
-          {/*  </span>*/}
-          <br />
-            Made by Asher Foster with a fuck ton of luck.
-            This product uses the TMDb API but is not endorsed or certified by TMDb.
-        </p>
-    </footer>
-  </div>
-)
+import React, {useState} from 'react';
+import {Store} from './store/Store';
+import MovieView from './MovieView';
+
+const TITLES = [
+  'What should I fucking watch?!',
+  'What the fuck should I watch?',
+  'Fuck, what do I watch?!',
+  'Try this fucking movie',
+  'Fuck you, watch a movie.',
+];
+
+const App = () => {
+  const [title] = useState(
+    () => TITLES[Math.floor(Math.random() * TITLES.length)]
+  );
+  return (
+    <Store>
+      <div>
+        <h1>{title}</h1>
+        <hr />
+        <MovieView />
+        <hr />
+        <footer>
+          <p>
+            <a href="https://github.com/asherfoster/wtfsiw">Github</a> -
+            <a href="https://asherfoster.com/things/whatthefuckshouldiwatch">
+              About
+            </a>
+          </p>
+          <p>
+            Made by Asher Foster for no fucking reason. This product uses the
+            TMDb API but is not endorsed or certified by TMDb.
+          </p>
+        </footer>
+      </div>
+    </Store>
+  );
+};
+
+export default App;
