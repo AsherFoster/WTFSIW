@@ -2,10 +2,12 @@
   "name": "@asherfoster/wtfsiw",
   "version": "2.0.0",
   "description": "Find some fucking movies",
-  "main": "dist/index.js",
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "node build.js",
+    "format": "prettier --write '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint": "eslint src --max-warnings=0 && prettier --check '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -33,11 +35,11 @@
   },
   "dependencies": {
     "@sentry/browser": "^6.17.9",
-    "@sentry/node": "^6.17.9",
-    "ajv": "^8.10.0",
     "itty-router": "^2.4.10",
     "moviedb-promise": "^3.1.13",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "toucan-js": "^2.5.0",
+    "zod": "^3.13.4"
   }
 }

@@ -1,45 +1,42 @@
 import type {Request} from 'itty-router';
-import Ajv from 'ajv/dist/jtd';
 import {generateActions, getScoredMovie} from '../scoring';
-import {getRandomMovies} from '../data';
 import {preferenceListSchema} from '../../shared/clientapi/Request';
-import {createErrorResponse, createResponse, getClientMovie} from '../response';
 import type {RankedMovieResponse} from '../../shared/clientapi/Response';
+import {createErrorResponse, createResponse, getClientMovie} from '../response';
+import type {Storage} from '../storage';
 
-const ajv = new Ajv();
-const parse = ajv.compileParser(preferenceListSchema);
-
-async function returnRandomMovie(): Promise<Response> {
-  const [movie] = await getRandomMovies(1);
+async function returnRandomMovie(storage: Storage): Promise<Response> {
+  const [movie] = await storage.getRandomMovies(1);
 
   return createResponse<RankedMovieResponse>({
-    movie: await getClientMovie(movie),
+    movie: await getClientMovie(storage, movie),
     actions: await generateActions(movie, []),
   });
 }
 
-export const ScoredMovie = async (request: Request) => {
+export const ScoredMovie = async (request: Request, storage: Storage) => {
   const prefString = request.query?.preferences;
   if (!prefString) {
-    return returnRandomMovie();
+    return returnRandomMovie(storage);
   }
 
-  const prefs = parse(prefString);
-  if (!prefs) {
+  const parsed = preferenceListSchema.safeParse(prefString);
+  if (!parsed.success) {
     return createErrorResponse(
       'ERR_BAD_REQUEST',
-      parse.message || 'Unable to parse prefs'
+      parsed.error.message || 'Unable to parse prefs'
     );
   }
 
+  const prefs = parsed.data;
   if (!prefs.length) {
-    return returnRandomMovie();
+    return returnRandomMovie(storage);
   }
 
-  const {movie, factors} = await getScoredMovie(prefs);
+  const {movie, factors} = await getScoredMovie(storage, prefs);
 
   return createResponse<RankedMovieResponse>({
-    movie: await getClientMovie(movie),
+    movie: await getClientMovie(storage, movie),
     actions: await generateActions(movie, prefs),
     rankingInfo: factors,
   });

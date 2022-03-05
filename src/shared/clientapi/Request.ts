@@ -1,6 +1,4 @@
-import {RankingPreference, rankingPreferenceSchema} from './Scoring';
-import type {JTDSchemaType} from 'ajv/dist/jtd';
+import {z} from 'zod';
+import {rankingPreferenceSchema} from './Scoring';
 
-export const preferenceListSchema: JTDSchemaType<RankingPreference[]> = {
-  elements: rankingPreferenceSchema,
-};
+export const preferenceListSchema = z.array(rankingPreferenceSchema);

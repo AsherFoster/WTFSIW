@@ -1,5 +1,4 @@
 import {assertNever, sample, weightedSample} from '../shared/util';
-import {getRandomMovies} from './data';
 import type {
   GenrePreference,
   PersonPreference,
@@ -7,6 +6,7 @@ import type {
 } from '../shared/clientapi/Scoring';
 import type {Credit, Movie} from '../shared/database';
 import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../shared/config';
+import {Storage} from './storage';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {
@@ -87,9 +87,10 @@ function scoreMovie(movie: Movie, prefs: RankingPreference[]): ScoredMovie {
 }
 
 export async function getScoredMovie(
+  storage: Storage,
   prefs: RankingPreference[]
 ): Promise<ScoredMovie> {
-  const sampledMovies = await getRandomMovies(INITIAL_SAMPLE_SIZE);
+  const sampledMovies = await storage.getRandomMovies(INITIAL_SAMPLE_SIZE);
   const scoredMovies = sampledMovies
     .map((m) => scoreMovie(m, prefs))
     .sort((a, b) => b.score - a.score);

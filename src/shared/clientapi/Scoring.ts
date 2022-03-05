@@ -1,48 +1,21 @@
-import type {JTDSchemaType} from 'ajv/dist/jtd';
+import {z} from 'zod';
 
-export interface PersonPreference {
-  type: 'person';
-  personId: number;
-  weight: number;
-}
-const personPreferenceSchema: JTDSchemaType<PersonPreference> = {
-  properties: {
-    type: {
-      enum: ['person'],
-    },
-    personId: {
-      type: 'int32',
-    },
-    weight: {
-      type: 'int32',
-    },
-  },
-};
+const personPreferenceSchema = z.object({
+  type: z.literal('person'),
+  personId: z.number().int(),
+  weight: z.number(),
+});
+export type PersonPreference = z.infer<typeof personPreferenceSchema>;
 
-export interface GenrePreference {
-  type: 'genre';
-  genreId: number;
-  weight: number;
-}
-const genrePreferenceSchema: JTDSchemaType<GenrePreference> = {
-  properties: {
-    type: {
-      enum: ['genre'],
-    },
-    genreId: {
-      type: 'int32',
-    },
-    weight: {
-      type: 'int32',
-    },
-  },
-};
+const genrePreferenceSchema = z.object({
+  type: z.literal('genre'),
+  genreId: z.number().int(),
+  weight: z.number(),
+});
+export type GenrePreference = z.infer<typeof genrePreferenceSchema>;
 
-export type RankingPreference = GenrePreference | PersonPreference;
-export const rankingPreferenceSchema: JTDSchemaType<RankingPreference> = {
-  discriminator: 'type',
-  mapping: {
-    person: personPreferenceSchema,
-    genre: genrePreferenceSchema,
-  },
-};
+export const rankingPreferenceSchema = z.discriminatedUnion('type', [
+  personPreferenceSchema,
+  genrePreferenceSchema,
+]);
+export type RankingPreference = z.infer<typeof rankingPreferenceSchema>;

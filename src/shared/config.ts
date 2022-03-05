@@ -7,7 +7,6 @@ if (!allowedEnvironments.includes(ENVIRONMENT)) {
 }
 
 export const SENTRY_DSN = process.env.SENTRY_DSN;
-export const PORT = process.env.PORT || 8080;
 
 // Scoring algorithm parameters
 export const INITIAL_SAMPLE_SIZE = 100;

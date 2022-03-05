@@ -5,8 +5,8 @@ import {
   ErrorResponse,
   statusCodes,
 } from '../shared/clientapi/Response';
-import {Credit, Movie} from '../shared/database';
-import {getGenre, getPerson} from './data';
+import {Credit, Genre, Movie} from '../shared/database';
+import {Storage} from './storage';
 
 const baseHeaders = {'Content-Type': 'application/json'};
 
@@ -34,16 +34,22 @@ export function createErrorResponse(
   );
 }
 
-async function getCreditWithPerson(credit: Credit): Promise<CreditWithPerson> {
+async function getCreditWithPerson(
+  storage: Storage,
+  credit: Credit
+): Promise<CreditWithPerson> {
   return {
     job: credit.job,
     creditType: credit.creditType,
     creditNumber: credit.creditNumber,
-    person: await getPerson(credit.personId),
+    person: (await storage.getPerson(credit.personId))!, // TODO don't not-null it
   };
 }
 
-export async function getClientMovie(movie: Movie): Promise<ClientMovie> {
+export async function getClientMovie(
+  storage: Storage,
+  movie: Movie
+): Promise<ClientMovie> {
   return {
     id: movie.id,
     title: movie.title,
@@ -52,9 +58,11 @@ export async function getClientMovie(movie: Movie): Promise<ClientMovie> {
     releaseDate: movie.releaseDate,
     averageRating: movie.averageRating,
 
-    genres: await Promise.all(movie.genres.map((g) => getGenre(g))),
+    genres: (await Promise.all(
+      movie.genres.map((g) => storage.getGenre(g))
+    )) as Genre[], // TODO don't cast
     credits: await Promise.all(
-      movie.credits.map((c) => getCreditWithPerson(c))
+      movie.credits.map((c) => getCreditWithPerson(storage, c))
     ),
   };
 }
