@@ -2,13 +2,9 @@ import type {Request} from 'itty-router';
 import Ajv from 'ajv/dist/jtd';
 import {generateActions, getScoredMovie} from '../scoring';
 import {getRandomMovies} from '../data';
-import {preferenceListSchema} from '../../types/clientapi/Request';
-import type {RankedMovieResponse} from '../../types/clientapi/Response';
-import {
-  createErrorResponse,
-  createResponse,
-  getClientMovie,
-} from '../../types/clientapi/Response';
+import {preferenceListSchema} from '../../shared/clientapi/Request';
+import {createErrorResponse, createResponse, getClientMovie} from '../response';
+import type {RankedMovieResponse} from '../../shared/clientapi/Response';
 
 const ajv = new Ajv();
 const parse = ajv.compileParser(preferenceListSchema);

@@ -1,8 +1,8 @@
 import type {
   ErrorResponse,
   RankedMovieResponse,
-} from '../types/clientapi/Response';
-import type {RankingPreference} from '../types/clientapi/Scoring';
+} from '../shared/clientapi/Response';
+import type {RankingPreference} from '../shared/clientapi/Scoring';
 
 export async function getMovie(
   prefs: RankingPreference[] = []

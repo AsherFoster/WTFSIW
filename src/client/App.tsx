@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Store} from './store/Store';
-import MovieView from './MovieView';
+import MovieView from './components/MovieView';
 
 const TITLES = [
   'What should I fucking watch?!',

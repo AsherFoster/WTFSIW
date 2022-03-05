@@ -2,10 +2,9 @@ import type {Dispatch, Reducer} from 'react';
 import type {
   ErrorResponse,
   RankedMovieResponse,
-} from '../../types/clientapi/Response';
-import type {RankingPreference} from '../../types/clientapi/Scoring';
-import {assertNever} from '../util';
-import {getMovie} from '../api';
+} from '../../shared/clientapi/Response';
+import type {RankingPreference} from '../../shared/clientapi/Scoring';
+import {assertNever} from '../../shared/util';
 
 export interface State {
   loading: boolean;
@@ -17,16 +16,18 @@ interface AddPreferenceAction {
   type: 'add_preference';
   payload: RankingPreference;
 }
-interface FetchMovieAction {
-  type: 'fetch_movie';
-  payload: void;
+interface StartLoadingAction {
+  type: 'start_loading';
 }
 interface MovieLoadedAction {
   type: 'movie_loaded';
   payload: RankedMovieResponse | ErrorResponse;
 }
 
-export type Action = AddPreferenceAction | FetchMovieAction | MovieLoadedAction;
+export type Action =
+  | AddPreferenceAction
+  | StartLoadingAction
+  | MovieLoadedAction;
 export type StoreDispatch = Dispatch<Action>;
 
 export const stateReducer: Reducer<State, Action> = (
@@ -54,9 +55,7 @@ export const stateReducer: Reducer<State, Action> = (
         ],
       };
     }
-    case 'fetch_movie': {
-      // TODO how do async actions work again?
-      getMovie(state.preferences).then((r) => dispatch());
+    case 'start_loading': {
       return {
         ...state,
         loading: true,

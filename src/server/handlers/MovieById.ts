@@ -1,11 +1,7 @@
-import {Request} from 'itty-router';
+import type {Request} from 'itty-router';
 import {getMovie} from '../data';
-import {
-  createErrorResponse,
-  createResponse,
-  getClientMovie,
-  MovieResponse,
-} from '../../types/clientapi/Response';
+import {createErrorResponse, createResponse, getClientMovie} from '../response';
+import type {MovieResponse} from '../../shared/clientapi/Response';
 
 export const MovieById = async (request: Request) => {
   const idStr = request.params?.id;

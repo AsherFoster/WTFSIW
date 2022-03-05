@@ -7,9 +7,9 @@ import {
   getMovies,
   getMovieCredits,
 } from './tmdb';
-import {MOVIE_DATASET_SIZE} from '../config';
-import type {Credit, Genre, Movie, Person} from '../types/database';
-import type {CreditWithPerson} from '../types/clientapi/Response';
+import {MOVIE_DATASET_SIZE} from '../shared/config';
+import type {Credit, Genre, Movie, Person} from '../shared/database';
+import type {CreditWithPerson} from '../shared/clientapi/Response';
 
 interface AllTheThings {
   genres: Genre[];
@@ -95,7 +95,7 @@ export async function getAllTheThings(): Promise<AllTheThings> {
 
   for (const movie of tmdbMovies) {
     const {cast, crew} = await getMovieCredits(movie.id!);
-    const credits = toCredits(cast, crew).map(c => {
+    const credits = toCredits(cast, crew).map((c) => {
       // I wonder if it's faster to check or not
       if (!persons.has(c.person.id)) persons.set(c.person.id, c.person.name);
       return {

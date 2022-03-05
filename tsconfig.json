@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "module": "es2022",
     "moduleResolution": "node",
-    "target": "esnext",
+    "noEmit": true,
     "sourceMap": true,
     "strict": true,
-    "outDir": "dist",
-    "jsx": "preserve",
-    "esModuleInterop": true
+    "target": "esnext",
+    "lib": ["esnext"]
   },
   "exclude": [
     "node_modules"

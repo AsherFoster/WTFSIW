@@ -1,12 +1,12 @@
-import {assertNever, sample, weightedSample} from './util';
+import {assertNever, sample, weightedSample} from '../shared/util';
 import {getRandomMovies} from './data';
 import type {
   GenrePreference,
   PersonPreference,
   RankingPreference,
-} from '../types/clientapi/Scoring';
-import type {Credit, Movie} from '../types/database';
-import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../config';
+} from '../shared/clientapi/Scoring';
+import type {Credit, Movie} from '../shared/database';
+import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../shared/config';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {
@@ -29,9 +29,9 @@ export async function generateActions(
 ): Promise<RankingPreference[]> {
   const actions: RankingPreference[] = [
     ...movie.genres
-      .filter(g => !prefs.find(p => p.type === 'genre' && p.genreId === g))
+      .filter((g) => !prefs.find((p) => p.type === 'genre' && p.genreId === g))
       .map(
-        g =>
+        (g) =>
           ({
             type: 'genre',
             genreId: g,
@@ -40,11 +40,12 @@ export async function generateActions(
       ),
     ...movie.credits
       .filter(
-        c => !prefs.find(p => p.type === 'person' && p.personId === c.personId)
+        (c) =>
+          !prefs.find((p) => p.type === 'person' && p.personId === c.personId)
       )
-      .filter(c => isMeaningfulPerson(c))
+      .filter((c) => isMeaningfulPerson(c))
       .map(
-        c =>
+        (c) =>
           ({
             type: 'person',
             personId: c.personId,
@@ -65,7 +66,7 @@ function applyPreference(movie: Movie, pref: RankingPreference): number {
   if (pref.type === 'genre') {
     if (movie.genres.includes(pref.genreId)) return pref.weight;
   } else if (pref.type === 'person') {
-    if (movie.credits.find(c => c.personId === pref.personId)) {
+    if (movie.credits.find((c) => c.personId === pref.personId)) {
       return pref.weight;
     }
   } else assertNever(pref);
@@ -76,7 +77,7 @@ function scoreMovie(movie: Movie, prefs: RankingPreference[]): ScoredMovie {
   let score = 0;
   return {
     movie,
-    factors: prefs.map(pref => {
+    factors: prefs.map((pref) => {
       const weight = applyPreference(movie, pref);
       score += weight;
       return pref;
@@ -90,7 +91,7 @@ export async function getScoredMovie(
 ): Promise<ScoredMovie> {
   const sampledMovies = await getRandomMovies(INITIAL_SAMPLE_SIZE);
   const scoredMovies = sampledMovies
-    .map(m => scoreMovie(m, prefs))
+    .map((m) => scoreMovie(m, prefs))
     .sort((a, b) => b.score - a.score);
 
   // Return a random movie from the set, biased towards high scores

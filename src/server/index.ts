@@ -11,3 +11,7 @@ router
   .get('*', () => new Response('Not Found :(', {status: 404}));
 
 export const handleRequest = (request: Request) => router.handle(request);
+
+addEventListener('fetch', (event) => {
+  event.respondWith(handleRequest(event.request));
+});

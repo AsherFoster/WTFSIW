@@ -1,7 +1,7 @@
 import {MovieDb} from 'moviedb-promise';
 import type {Cast, Crew, MovieResult} from 'moviedb-promise/dist/request-types';
 import type {Genre} from 'moviedb-promise/dist/types';
-import {TMDB_API_KEY} from '../config';
+import {TMDB_API_KEY} from '../shared/config';
 
 export * from 'moviedb-promise/dist/request-types';
 export * from 'moviedb-promise/dist/types';

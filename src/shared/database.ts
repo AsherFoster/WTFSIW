@@ -15,7 +15,7 @@ export interface Credit {
   personId: number;
   creditType: 'cast' | 'crew';
   job: string;
-  creditNumber?: number; // present on 'cast' types
+  creditNumber?: number; // present on 'cast' shared
 }
 
 export interface Movie {

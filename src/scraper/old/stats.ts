@@ -1,4 +1,4 @@
-import {API, DataDump} from '../../types';
+import {API, DataDump} from '../../shared';
 
 const movies: DataDump[] = require('../../data/movies');
 
@@ -20,7 +20,7 @@ const stats = {
   noOrderCount: 0,
 };
 
-movies.forEach(movie => {
+movies.forEach((movie) => {
   stats.maxTitleLength = Math.max(
     movie.discover.title.length,
     stats.maxTitleLength
@@ -41,7 +41,7 @@ movies.forEach(movie => {
   if (typeof movie.discover.release_date !== 'string') stats.noReleaseCount++;
 
   if (movie.crew && movie.crew.length) {
-    movie.crew.forEach(crew => {
+    movie.crew.forEach((crew) => {
       stats.maxPersonNameLength = Math.max(
         crew.name.length,
         stats.maxPersonNameLength
@@ -67,7 +67,8 @@ movies.forEach(movie => {
 
       // If there's another cast with same order:
       if (
-        (movie.cast as API.Cast[]).findIndex(c => c.order === cast.order) !== i
+        (movie.cast as API.Cast[]).findIndex((c) => c.order === cast.order) !==
+        i
       ) {
         if (cast.order === 0) stats.multiZeroOrderCount++;
         else {
