@@ -23,23 +23,33 @@ export const ScoredMovie: WTFSIWFunction<never> = async ({request, data}) => {
   const {storage} = data;
   const url = new URL(request.url);
   const prefString = url.searchParams.get('preferences');
+
+  // If no preferences were passed - return a random movie
   if (!prefString) {
     return returnRandomMovie(storage);
   }
 
-  const parsed = preferenceListSchema.safeParse(prefString);
-  if (!parsed.success) {
-    return createErrorResponse(
-      'ERR_BAD_REQUEST',
-      parsed.error.message || 'Unable to parse prefs'
-    );
+  // If the prefs are there, validate the hell out of them
+  let prefs;
+  try {
+    const parsed = preferenceListSchema.safeParse(JSON.parse(prefString));
+    if (!parsed.success) {
+      return createErrorResponse(
+        'ERR_BAD_REQUEST',
+        parsed.error.message || 'Unable to parse prefs'
+      );
+    }
+    prefs = parsed.data;
+  } catch (e) {
+    return createErrorResponse('ERR_BAD_REQUEST', 'Unable to parse prefs');
   }
 
-  const prefs = parsed.data;
+  // If the prefs are empty, we're back to returning a random movie
   if (!prefs.length) {
     return returnRandomMovie(storage);
   }
 
+  // Ok, we have valid, non-empty prefs! Let's give them something good!
   const {movie, factors} = await getScoredMovie(storage, prefs);
 
   return createResponse<ScoredMovieResponse>({
