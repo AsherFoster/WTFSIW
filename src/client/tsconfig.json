@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "lib": ["dom"],
+    "lib": ["es2015","dom"],
     "types": ["react", "react-dom"]
   }
 }
