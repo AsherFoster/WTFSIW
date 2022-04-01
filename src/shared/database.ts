@@ -6,15 +6,11 @@ export interface Genre {
   name: string;
 }
 
-export interface Person {
-  id: number;
-  name: string;
-}
-
 export interface Credit {
   personId: number;
+  name: string;
   creditType: 'cast' | 'crew';
-  job: string;
+  job: string | null;
   creditNumber?: number; // present on 'cast' shared
 }
 
@@ -23,8 +19,9 @@ export interface Movie {
   title: string;
   overview: string;
   posterUrl: string | null;
-  releaseDate: string;
+  releaseDate: string | null;
   averageRating: number;
+  popularity: number;
 
   genres: number[];
   credits: Credit[];
@@ -32,6 +29,5 @@ export interface Movie {
 
 interface Root {
   movies: Movie[];
-  persons: Person[];
   genres: Genre[];
 }

@@ -1,4 +1,4 @@
 import {z} from 'zod';
-import {rankingPreferenceSchema} from './Scoring';
+import {scoringPreferenceSchema} from './Scoring';
 
-export const preferenceListSchema = z.array(rankingPreferenceSchema);
+export const preferenceListSchema = z.array(scoringPreferenceSchema);

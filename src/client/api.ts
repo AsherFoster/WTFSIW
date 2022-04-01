@@ -1,12 +1,12 @@
 import type {
   ErrorResponse,
-  RankedMovieResponse,
+  ScoredMovieResponse,
 } from '../shared/clientapi/Response';
-import type {RankingPreference} from '../shared/clientapi/Scoring';
+import type {ScoringPreference} from '../shared/clientapi/Scoring';
 
 export async function getMovie(
-  prefs: RankingPreference[] = []
-): Promise<RankedMovieResponse | ErrorResponse> {
+  prefs: ScoringPreference[] = []
+): Promise<ScoredMovieResponse | ErrorResponse> {
   const query = new URLSearchParams();
   if (prefs) {
     query.append('preferences', JSON.stringify(prefs));

@@ -10,7 +10,8 @@ preview_id = "9f8139775fc044dda406db9c3b86a9b2"
 id = "eff3591587a14a5eaf64699b2297e407"
 
 [build]
-command = "npm run build"
+command="npm run build"
+watch_dir="src"
 
 [build.upload]
 format = "modules"
@@ -21,6 +22,10 @@ main = "./server.js"
 type = "ESModule"
 globs = ["**/*.js"]
 
-[env.production]
+[env.staging]
 zone_id = "a8f970aee785a2eb4d51fa750636af25"
 route = "next.wtfsiw.xyz/*"
+
+[env.production]
+zone_id = "a8f970aee785a2eb4d51fa750636af25"
+route = "wtfsiw.xyz/*"

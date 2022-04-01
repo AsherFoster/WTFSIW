@@ -1,117 +1,51 @@
-import {
-  getGenres,
-  Genre as TMDBGenre,
-  MovieResult as TMDBMovie,
-  Crew,
-  Cast,
-  getMovies,
-  getMovieCredits,
-} from './tmdb';
-import {MOVIE_DATASET_SIZE} from '../shared/config';
-import type {Credit, Genre, Movie, Person} from '../shared/database';
-import type {CreditWithPerson} from '../shared/clientapi/Response';
+import * as kv from './kv';
+import type {Genre, Movie} from '../shared/database';
 
-interface AllTheThings {
-  genres: Genre[];
+interface LoadValues {
   movies: Movie[];
-  persons: Person[];
+  genres: Genre[];
 }
+async function load(
+  version: number,
+  {movies, genres}: LoadValues
+): Promise<void> {
+  const existingMovies = await kv.get<number[]>(version + '/movies');
+  let moviesToLoad = movies;
+  if (existingMovies) {
+    // Any existingMovies that aren't in movies should be removed
+    const moviesToRemove = existingMovies.filter(
+      (em) => !movies.find((m) => em === m.id)
+    );
+    await kv.deleteKeys(moviesToRemove.map((m) => version + '/movie/' + m));
+    console.log(`Removed ${moviesToRemove.length} movies`);
 
-function toGenre({id, name}: TMDBGenre): Genre {
-  if (!name || typeof id !== 'number') throw new Error('Bad genre');
-  return {id, name};
-}
+    // Any movies that aren't in existingMovies should be added
+    moviesToLoad = moviesToLoad.filter((m) => !existingMovies.includes(m.id));
 
-function castToCredit(cast: Cast): CreditWithPerson {
-  if (
-    typeof cast.id !== 'number' ||
-    !cast.name ||
-    !cast.character ||
-    typeof cast.order !== 'number'
-  ) {
-    throw new Error('bad cast');
+    // Any movies that are in both should be updated
+    // TODO update
   }
 
-  return {
-    person: {
-      id: cast.id,
-      name: cast.name,
-    },
-    creditType: 'cast',
-    job: cast.character,
-    creditNumber: cast.order,
-  };
-}
-function crewToCredit(crew: Crew): CreditWithPerson {
-  if (typeof crew.id !== 'number' || !crew.name || !crew.job) {
-    throw new Error('bad crew');
+  const items = [
+    ...moviesToLoad.map((m) => [version + '/movie/' + m.id, m]),
+    [version + '/movies', movies.map((m) => m.id)],
+    [version + '/genres', genres],
+  ] as [string, any][];
+
+  console.log(`Writing ${items.length} values to KV`);
+
+  await kv.bulkWrite(items);
+
+  // If we just loaded a new version, update the version and then nuke the old data
+  const currentVersion = await kv.get<number>('version');
+  if (currentVersion !== version) {
+    const oldKeys = await kv.listKeys(currentVersion + '/');
+    await kv.deleteKeys(oldKeys);
+    console.log(`Deleted ${oldKeys.length} old KV values`);
+
+    await kv.bulkWrite([['version', version]]);
+    console.log(`Updated version ${currentVersion} -> ${version}`);
   }
-  return {
-    person: {
-      id: crew.id,
-      name: crew.name,
-    },
-    creditType: 'crew',
-    job: crew.job,
-  };
-}
-function toCredits(cast: Cast[], crew: Crew[]): CreditWithPerson[] {
-  return cast.map(castToCredit).concat(crew.map(crewToCredit));
 }
 
-function toMovie(movie: TMDBMovie, credits: Credit[]): Movie {
-  if (
-    !movie.id ||
-    !movie.title ||
-    !movie.overview ||
-    !movie.poster_path ||
-    !movie.release_date ||
-    !movie.vote_average ||
-    !movie.popularity ||
-    !movie.genre_ids
-  ) {
-    throw new Error('bad movie'); // TODO some of these will be optional
-  }
-
-  return {
-    id: movie.id,
-    title: movie.title,
-    overview: movie.overview,
-    posterUrl: movie.poster_path, // TODO expand poster path
-    releaseDate: movie.release_date,
-    averageRating: movie.vote_average || movie.popularity,
-
-    genres: movie.genre_ids,
-    credits,
-  };
-}
-
-export async function getAllTheThings(): Promise<AllTheThings> {
-  const genres = await getGenres();
-  const tmdbMovies = await getMovies(MOVIE_DATASET_SIZE);
-
-  const movies: Movie[] = [];
-  const persons = new Map<number, string>();
-
-  for (const movie of tmdbMovies) {
-    const {cast, crew} = await getMovieCredits(movie.id!);
-    const credits = toCredits(cast, crew).map((c) => {
-      // I wonder if it's faster to check or not
-      if (!persons.has(c.person.id)) persons.set(c.person.id, c.person.name);
-      return {
-        personId: c.person.id,
-        creditType: c.creditType,
-        job: c.job,
-        creditNumber: c.creditNumber,
-      } as Credit;
-    });
-    movies.push(toMovie(movie, credits));
-  }
-
-  return {
-    movies,
-    // Hack to turn Set<a, b>() into {a, b}[]
-    persons: Array.from(persons.entries()).map(([id, name]) => ({id, name})),
-    genres: genres.map(toGenre),
-  };
-}
+export default load;

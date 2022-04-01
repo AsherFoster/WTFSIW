@@ -1,9 +1,10 @@
-import type {Credit, Genre, Person} from '../database';
-import type {RankingPreference} from './Scoring';
+import type {Genre} from '../database';
+import type {ScoringPreference} from './Scoring';
 
 // Error Response
 export const statusCodes = {
   ERR_BAD_REQUEST: 400,
+  ERR_UNAUTHORIZED: 401,
   ERR_NOT_FOUND: 404,
   ERR_INTERNAL_ERROR: 500,
 } as const;
@@ -14,24 +15,21 @@ export interface ErrorResponse {
 }
 
 // Specific API response shared
-export type CreditWithPerson = Omit<Credit, 'personId'> & {person: Person};
-
 export interface ClientMovie {
   id: number;
   title: string;
   overview: string;
   posterUrl: string | null;
-  releaseDate: string;
+  releaseDate: string | null;
   averageRating: number;
 
   genres: Genre[];
-  credits: CreditWithPerson[];
 }
 
-export interface RankedMovieResponse {
+export interface ScoredMovieResponse {
   movie: ClientMovie;
-  actions: RankingPreference[];
-  rankingInfo?: RankingPreference[];
+  actions: (ScoringPreference & {name: string})[];
+  rankingInfo?: ScoringPreference[];
 }
 export interface MovieResponse {
   movie: ClientMovie;

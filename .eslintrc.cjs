@@ -6,14 +6,14 @@ module.exports = {
   extends: [
     '@asherfoster',
     // '@typescript-eslint/recommended-requiring-type-checking',
-    'prettier'
+    'prettier',
   ],
   rules: {
     // TODO import ordering
     'react/jsx-filename-extension': 'off',
     curly: ['error', 'multi-line'],
-    "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
-    '@typescript-eslint/prefer-function-type': ['error']
+    '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+    '@typescript-eslint/prefer-function-type': ['error'],
   },
-  parserOptions: {tsconfigRootDir: __dirname}
+  parserOptions: {tsconfigRootDir: __dirname, ecmaVersion: 2022},
 };

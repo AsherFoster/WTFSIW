@@ -1,8 +1,9 @@
-import {getAllTheThings} from './load';
+import extract from './extract';
+import load from './load';
 
 async function main() {
-  const {movies, genres, persons} = await getAllTheThings();
-  // TODO load into KV
+  const allTheThings = await extract();
+  await load(1, allTheThings);
 }
 
 main();

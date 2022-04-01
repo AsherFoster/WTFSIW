@@ -14,8 +14,8 @@ const genrePreferenceSchema = z.object({
 });
 export type GenrePreference = z.infer<typeof genrePreferenceSchema>;
 
-export const rankingPreferenceSchema = z.discriminatedUnion('type', [
+export const scoringPreferenceSchema = z.discriminatedUnion('type', [
   personPreferenceSchema,
   genrePreferenceSchema,
 ]);
-export type RankingPreference = z.infer<typeof rankingPreferenceSchema>;
+export type ScoringPreference = z.infer<typeof scoringPreferenceSchema>;

@@ -1,27 +1,27 @@
 import type {Dispatch, Reducer} from 'react';
 import type {
   ErrorResponse,
-  RankedMovieResponse,
+  ScoredMovieResponse,
 } from '../../shared/clientapi/Response';
-import type {RankingPreference} from '../../shared/clientapi/Scoring';
+import type {ScoringPreference} from '../../shared/clientapi/Scoring';
 import {assertNever} from '../../shared/util';
 
 export interface State {
   loading: boolean;
-  movieResp: RankedMovieResponse | ErrorResponse | null;
-  preferences: RankingPreference[];
+  movieResp: ScoredMovieResponse | ErrorResponse | null;
+  preferences: ScoringPreference[];
 }
 
 interface AddPreferenceAction {
   type: 'add_preference';
-  payload: RankingPreference;
+  payload: ScoringPreference;
 }
 interface StartLoadingAction {
   type: 'start_loading';
 }
 interface MovieLoadedAction {
   type: 'movie_loaded';
-  payload: RankedMovieResponse | ErrorResponse;
+  payload: ScoredMovieResponse | ErrorResponse;
 }
 
 export type Action =
@@ -39,7 +39,7 @@ export const stateReducer: Reducer<State, Action> = (
       return {
         ...state,
         preferences: [
-          ...state.preferences.filter((p: RankingPreference) => {
+          ...state.preferences.filter((p: ScoringPreference) => {
             if (p.type === 'person') {
               return (
                 action.payload.type === 'person' &&

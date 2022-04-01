@@ -1,10 +1,8 @@
 import Toucan from 'toucan-js';
 import {SENTRY_DSN} from '../shared/config';
+import {WTFSIWContext} from './types';
 
-export function initSentry(
-  request: Request,
-  context: ExecutionContext
-): Toucan {
+export function initSentry(request: Request, context: WTFSIWContext): Toucan {
   // Based on some pretty cool config here https://github.com/cloudflare/worker-sentry/blob/main/index.js
   const sentry = new Toucan({
     dsn: SENTRY_DSN,

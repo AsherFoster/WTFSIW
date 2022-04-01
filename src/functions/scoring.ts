@@ -2,7 +2,7 @@ import {assertNever, sample, weightedSample} from '../shared/util';
 import type {
   GenrePreference,
   PersonPreference,
-  RankingPreference,
+  ScoringPreference,
 } from '../shared/clientapi/Scoring';
 import type {Credit, Movie} from '../shared/database';
 import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../shared/config';
@@ -10,24 +10,26 @@ import {Storage} from './storage';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {
-  if (credit.creditType === 'crew') {
+  if (credit.creditType === 'crew' && credit.job) {
     // Director -> Yup
     // Caterer -> Probably not
     return ['director'].includes(credit.job.toLowerCase());
-  } else {
+  } else if (credit.creditType === 'cast') {
     // Thanos -> Yup
     // Frightened inmate #2 -> Probably not
 
-    // arbitrarily say only the first 10 actors matter
-    return typeof credit.creditNumber === 'number' && credit.creditNumber < 10;
+    // arbitrarily say only the first 5 actors matter
+    return typeof credit.creditNumber === 'number' && credit.creditNumber < 5;
   }
+  return false;
 }
 
 export async function generateActions(
+  storage: Storage,
   movie: Movie,
-  prefs: RankingPreference[]
-): Promise<RankingPreference[]> {
-  const actions: RankingPreference[] = [
+  prefs: ScoringPreference[]
+): Promise<(ScoringPreference & {name: string})[]> {
+  const actions: ScoringPreference[] = [
     ...movie.genres
       .filter((g) => !prefs.find((p) => p.type === 'genre' && p.genreId === g))
       .map(
@@ -35,6 +37,7 @@ export async function generateActions(
           ({
             type: 'genre',
             genreId: g,
+            name: 'TODO genre names', // TODO genre names
             weight: Math.random() > 0.5 ? -1 : 1, // TODO tune weights
           } as GenrePreference)
       ),
@@ -49,6 +52,7 @@ export async function generateActions(
           ({
             type: 'person',
             personId: c.personId,
+            name: c.name + (c.job ? ` (as ${c.job})` : ''),
             weight: Math.random() > 0.5 ? -1 : 1, // TODO tune weights
           } as PersonPreference)
       ),
@@ -60,9 +64,9 @@ export async function generateActions(
 interface ScoredMovie {
   movie: Movie;
   score: number;
-  factors: RankingPreference[];
+  factors: ScoringPreference[];
 }
-function applyPreference(movie: Movie, pref: RankingPreference): number {
+function applyPreference(movie: Movie, pref: ScoringPreference): number {
   if (pref.type === 'genre') {
     if (movie.genres.includes(pref.genreId)) return pref.weight;
   } else if (pref.type === 'person') {
@@ -73,7 +77,7 @@ function applyPreference(movie: Movie, pref: RankingPreference): number {
 
   return 0;
 }
-function scoreMovie(movie: Movie, prefs: RankingPreference[]): ScoredMovie {
+function scoreMovie(movie: Movie, prefs: ScoringPreference[]): ScoredMovie {
   let score = 0;
   return {
     movie,
@@ -88,7 +92,7 @@ function scoreMovie(movie: Movie, prefs: RankingPreference[]): ScoredMovie {
 
 export async function getScoredMovie(
   storage: Storage,
-  prefs: RankingPreference[]
+  prefs: ScoringPreference[]
 ): Promise<ScoredMovie> {
   const sampledMovies = await storage.getRandomMovies(INITIAL_SAMPLE_SIZE);
   const scoredMovies = sampledMovies

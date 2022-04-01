@@ -1,6 +1,6 @@
-import {RankingPreference} from '../../shared/clientapi/Scoring';
+import type {ScoringPreference} from '../../shared/clientapi/Scoring';
 
-const PreferenceAction = ({preference}: {preference: RankingPreference}) => {
+const PreferenceAction = ({preference}: {preference: ScoringPreference}) => {
   return <a>Hi!</a>;
 };
 
