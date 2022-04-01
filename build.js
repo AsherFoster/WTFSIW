@@ -57,7 +57,8 @@ build({
 // Compile the src/functions tree into the base /functions dir used by CF Pages
 build({
   entryPoints: await walkDir('src/functions/api'),
-  outdir: 'functions/api',
+  outbase: 'src/functions',
+  outdir: 'functions',
   format: 'esm',
   bundle: true,
   sourcemap: true,

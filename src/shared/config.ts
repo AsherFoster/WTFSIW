@@ -26,7 +26,7 @@ export const SUGGESTED_ACTION_COUNT = 3;
 export const MOVIE_DATASET_SIZE = ENVIRONMENT === 'production' ? 5000 : 10;
 export const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
-// Scraper/Cloudflare KV params (duplicated from wrangler.toml)
+// Scraper/Cloudflare KV params
 export const CF_ACCOUNT_ID = '58371b47d4ca0f32a2aabf9c50836c44';
 export const CF_KV_NAMESPACE =
   ENVIRONMENT === 'production'
