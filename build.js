@@ -30,7 +30,7 @@ const define = {
 // Compile the client script into something browser-ready
 build({
   entryPoints: ['src/client/index.tsx'],
-  outdir: 'dist/client',
+  outdir: 'static/js',
   format: 'esm',
   bundle: true,
   minify: true,
