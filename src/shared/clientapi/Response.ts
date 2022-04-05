@@ -26,9 +26,10 @@ export interface ClientMovie {
   genres: Genre[];
 }
 
+export type ScoringAction = ScoringPreference & {name: string};
 export interface ScoredMovieResponse {
   movie: ClientMovie;
-  actions: (ScoringPreference & {name: string})[];
+  actions: ScoringAction[];
   rankingInfo?: ScoringPreference[];
 }
 export interface MovieResponse {

@@ -5,25 +5,6 @@ import PreferenceAction from './PreferenceAction';
 
 const SOURCE_PAGE_BASE = 'https://www.themoviedb.org/movie/';
 
-const filters = {
-  positive: {
-    generic: [
-      'I fucking love $ movies',
-      '$ movies are the fucking best!',
-      "I can't get enough of $ movies",
-    ],
-    genre: ['$ is the best fucking type of movie!'],
-    cast: ['$ is hot as fuck!'],
-    crew: ['$ makes the best movies!'],
-  },
-  negative: {
-    generic: ['Ew, fuck $', 'Honestly, fuck $'],
-    genre: ['$ movies are fucking boring'],
-    cast: ['$ killed my fucking dog'],
-    crew: ['$ killed my fucking dog'],
-  },
-};
-
 const MovieView = () => {
   const [state, dispatch] = useStore();
   const resp = state.movieResp;
@@ -56,11 +37,13 @@ const MovieView = () => {
     <>
       <h2>{movie.title}</h2>
       <p>{movie.overview}</p>
-      <div>
+      <ul>
         {actions.map((a, i) => (
-          <PreferenceAction key={i} preference={a} />
+          <li>
+            <PreferenceAction key={i} preference={a} />
+          </li>
         ))}
-      </div>
+      </ul>
     </>
   );
 };

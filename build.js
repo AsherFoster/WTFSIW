@@ -48,6 +48,7 @@ build({
   // format: 'esm',
   platform: 'node',
   bundle: true,
+  external: ['miniflare'],
   sourcemap: true,
   target: 'node16',
   watch,

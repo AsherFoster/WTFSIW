@@ -1,4 +1,4 @@
-import * as kv from './kv';
+import kv from './kv';
 import type {Genre, Movie} from '../shared/database';
 
 interface LoadValues {

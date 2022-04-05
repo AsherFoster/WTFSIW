@@ -7,7 +7,6 @@ declare const process: {
     CLOUDFLARE_API_KEY?: string;
   };
 };
-
 const allowedEnvironments = ['development', 'production', 'test'];
 if (!allowedEnvironments.includes(process.env.NODE_ENV as any)) {
   throw new Error(
@@ -28,6 +27,7 @@ export const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 // Scraper/Cloudflare KV params
 export const CF_ACCOUNT_ID = '58371b47d4ca0f32a2aabf9c50836c44';
+export const CF_KV_BINDING = 'storage';
 export const CF_KV_NAMESPACE =
   ENVIRONMENT === 'production'
     ? 'eff3591587a14a5eaf64699b2297e407'

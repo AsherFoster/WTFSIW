@@ -1,7 +1,7 @@
 import type {WTFSIWFunction} from './types';
 import {Storage} from './storage';
 import {initSentry} from './sentry';
-import {ENVIRONMENT} from '../shared/config';
+import {CF_KV_BINDING, ENVIRONMENT} from '../shared/config';
 import {createErrorResponse} from './response';
 
 export const sentryMiddleware: WTFSIWFunction = async (context) => {
@@ -18,6 +18,6 @@ export const sentryMiddleware: WTFSIWFunction = async (context) => {
 };
 
 export const storageMiddleware: WTFSIWFunction = async ({data, env, next}) => {
-  data.storage = new Storage(env.storage);
+  data.storage = new Storage(env[CF_KV_BINDING]);
   return next();
 };

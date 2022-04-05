@@ -7,6 +7,7 @@ import type {
 import type {Credit, Movie} from '../shared/database';
 import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../shared/config';
 import {Storage} from './storage';
+import type {ScoringAction} from '../shared/clientapi/Response';
 
 /** Do you matter in the grand scheme of things? This function knows. */
 function isMeaningfulPerson(credit: Credit): boolean {
@@ -28,8 +29,8 @@ export async function generateActions(
   storage: Storage,
   movie: Movie,
   prefs: ScoringPreference[]
-): Promise<(ScoringPreference & {name: string})[]> {
-  const actions: ScoringPreference[] = [
+): Promise<ScoringAction[]> {
+  const actions: ScoringAction[] = [
     ...movie.genres
       .filter((g) => !prefs.find((p) => p.type === 'genre' && p.genreId === g))
       .map(
@@ -39,7 +40,7 @@ export async function generateActions(
             genreId: g,
             name: 'TODO genre names', // TODO genre names
             weight: Math.random() > 0.5 ? -1 : 1, // TODO tune weights
-          } as GenrePreference)
+          } as ScoringAction)
       ),
     ...movie.credits
       .filter(
@@ -54,7 +55,7 @@ export async function generateActions(
             personId: c.personId,
             name: c.name + (c.job ? ` (as ${c.job})` : ''),
             weight: Math.random() > 0.5 ? -1 : 1, // TODO tune weights
-          } as PersonPreference)
+          } as ScoringAction)
       ),
   ];
 
