@@ -1,5 +1,7 @@
 # What the fuck should I watch?
 
+Do you want to watch a movie? Do you find normal recommendation sites too polite? Well, this is the app for you!
+
 ## 2.0 goals
 - High levels of automation
   - Build & Deploy
@@ -14,20 +16,22 @@
 - Making the most of a common search term with good SEO
 - Privacy-friendly analytics to feed my curiosity
 
-## Setup
-- Clone the repo
-- `npm i`
-- `npm build`
-- Either build the database yourself, or place supplied data files in the `./data` dir
-- `npm start`
+## Usage
+- Clone, then `npm install`
+- Build using `npm run build` (or `npm run build watch`)
+  - You'll need to have [Environment Variables](#environment-variables) configured (these get baked in at buildtime)
+- Run `npm run scraper` to populate your KV with movie data. (When built in `development` this will populate Miniflare)
+- Run `npm run dev` to start Miniflare and serve the static content
+- Open [localhost:8788/](http://localhost:8788/)
 
 ## Configuration
-For runtime config, check out `src/config.ts`
 
-## Building the DB
-First, download all the required data files with `./scripts/download.js`
-Then import it all into a SQLite DB with `./scripts/import.js`
+### Environment variables:
 
-## Disclaimer
-Yeah, this is open souce, but it's a quick and dirty project for an assessment.
-Things probably won't work if you try building it from scratch
+- `NODE_ENV`: `development` or `production`
+- `TMDB_API_KEY`: Your ["API Read Access Token (v4 auth)"](https://www.themoviedb.org/settings/api). Used by the scraper to authenticate to TMDB's API.
+- `CLOUDFLARE_API_KEY`: TODO confirm, should be optional on local dev when using Miniflare
+- `SENTRY_DSN`: Used for error reporting, usually left unset in development.
+
+### Additional configuration
+Additional configuration can be found in `src/shared/config.ts`

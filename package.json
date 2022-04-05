@@ -6,10 +6,10 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "dev": "wrangler pages dev --kv storage --proxy 3000 --kv-persist ./miniflare-kv -- serve static",
+    "dev": "wrangler pages dev --kv storage --proxy 3000 -- serve static",
     "format": "prettier --write '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
     "lint": "eslint src --max-warnings=0 && prettier --check '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "scraper": "node dist/scraper.cjs"
   },
   "repository": {
     "type": "git",
@@ -34,7 +34,8 @@
     "miniflare": "^2.4.0",
     "moviedb-promise": "^3.1.13",
     "prettier": "^2.5.1",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "wrangler": "^0.0.24"
   },
   "dependencies": {
     "@sentry/browser": "^6.17.9",

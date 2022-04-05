@@ -1,7 +1,11 @@
-.idea
+# Compiled outputs
 dist
 functions
 static/js
+
+# Config stores
+.idea
+.mf
 
 # Created by .ignore support plugin (hsz.mobi)
 ### macOS template

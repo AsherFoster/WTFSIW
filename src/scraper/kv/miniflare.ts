@@ -4,9 +4,12 @@ import {CF_KV_BINDING} from '../../shared/config';
 
 export class MiniflareKV implements KV {
   private miniflare = new Miniflare({
-    modules: true,
+    // We don't actually want to run anything in Miniflare. All we care about is its KV access
+    script: '',
+    // Ambiguous arg matches `wrangler pages dev`. Defaults to ./.mf/kv
+    // https://miniflare.dev/storage/kv#persistence
+    kvPersist: true,
     kvNamespaces: [CF_KV_BINDING],
-    kvPersist: './miniflare-kv',
   });
 
   private kv = this.miniflare.getKVNamespace(CF_KV_BINDING);
@@ -23,7 +26,7 @@ export class MiniflareKV implements KV {
   async bulkWrite(values: [string, any][]): Promise<void> {
     const kv = await this.kv;
 
-    await Promise.all(values.map(([k, v]) => kv.put(k, v)));
+    await Promise.all(values.map(([k, v]) => kv.put(k, JSON.stringify(v))));
   }
 
   async listKeys(prefix?: string): Promise<string[]> {
