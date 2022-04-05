@@ -6,8 +6,8 @@
 }
 @media screen and (prefers-color-scheme: dark) {
     :root {
-        --background: #000;
-        --color: #FFF;
+        --background: #111;
+        --color: #EEE;
     }
 }
 html {
@@ -15,21 +15,7 @@ html {
     color: var(--color);
 }
 
-#root {
-    max-width: var(--page-width);
-    margin: auto;
-    font-size: 20px;
-}
 
 a {
     color: inherit;
-}
-
-h1 {
-    text-transform: uppercase;
-    font-size: 70px;
-}
-hr {
-    color: inherit;
-    border: 2px solid currentColor;
 }

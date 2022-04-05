@@ -1,12 +1,8 @@
 import {assertNever, sample, weightedSample} from '../shared/util';
-import type {
-  GenrePreference,
-  PersonPreference,
-  ScoringPreference,
-} from '../shared/clientapi/Scoring';
-import type {Credit, Movie} from '../shared/database';
 import {INITIAL_SAMPLE_SIZE, SUGGESTED_ACTION_COUNT} from '../shared/config';
 import {Storage} from './storage';
+import type {ScoringPreference} from '../shared/clientapi/Scoring';
+import type {Credit, Movie} from '../shared/database';
 import type {ScoringAction} from '../shared/clientapi/Response';
 
 /** Do you matter in the grand scheme of things? This function knows. */

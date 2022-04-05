@@ -22,4 +22,5 @@ export const Store = ({children}: React.PropsWithChildren<{}>) => {
   );
 };
 
-export const useStore = () => useContext(StoreContext);
+export const useStore = () => useContext(StoreContext)[0];
+export const useDispatch = () => useContext(StoreContext)[1];
