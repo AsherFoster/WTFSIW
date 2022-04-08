@@ -2,8 +2,8 @@ import React, {useEffect} from 'react';
 import {useDispatch, useStore} from '../store/Store';
 import {getMovie} from '../api';
 import './MovieView.css';
-
-const SOURCE_PAGE_BASE = 'https://www.themoviedb.org/movie/';
+import Movie from './Movie';
+import ErrorMessage from './ErrorMessage';
 
 const filters = {
   positive: {
@@ -28,7 +28,9 @@ const MovieView = () => {
   const dispatch = useDispatch();
   const store = useStore();
   const {loading, movieResp, preferences} = store;
-  const loadingCls = loading ? 'MovieView-content--loading' : '';
+  const cls = ['MovieView-content', loading && 'MovieView-content--loading']
+    .filter((i) => !!i)
+    .join(' ');
 
   function reloadMovie() {
     // IDK how async reducers are supposed to work. This'll do for now :shrug:
@@ -46,56 +48,21 @@ const MovieView = () => {
     if (preferences) reloadMovie();
   }, [preferences]);
 
-  if (loading && !movieResp) {
+  if (!movieResp) {
     return (
-      <div className={'MovieView-placeholder ' + loadingCls}>
-        <h2>Browsing the archives...</h2>
+      <div className={cls}>
+        <h2>Finding something good...</h2>
       </div>
     );
   }
-
-  if (!movieResp || 'error' in movieResp) {
-    return (
-      <div className={loadingCls}>
-        <h2>Fuck. Something went wrong.</h2>
-        <button onClick={reloadMovie}>Try again</button>
-        {movieResp && (
-          <p>
-            {movieResp.message} ({movieResp.error})
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  const {movie, actions} = movieResp;
 
   return (
-    <div className={loadingCls}>
-      <h2>{movie.title}</h2>
-      <p>
-        {movie.overview} -&nbsp;
-        <a href={SOURCE_PAGE_BASE + movie.id}>View on TMDb</a>
-      </p>
-      <ul className="MovieView-actions">
-        {actions.map((action, i) => (
-          <li key={i}>
-            <button
-              className="MovieView-action"
-              onClick={() =>
-                dispatch({type: 'add_preference', payload: action})
-              }
-            >
-              {action.name}
-            </button>
-          </li>
-        ))}
-        <li>
-          <button className="MovieView-action" onClick={reloadMovie}>
-            Give me another fucking movie
-          </button>
-        </li>
-      </ul>
+    <div className={cls}>
+      {'error' in movieResp ? (
+        <ErrorMessage resp={movieResp} />
+      ) : (
+        <Movie movie={movieResp.movie} actions={movieResp.actions} />
+      )}
     </div>
   );
 };

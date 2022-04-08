@@ -2,9 +2,6 @@
     list-style-type: none;
     padding: 0;
 }
-.MovieView-placeholder {
-    height: 200px;
-}
 
 .MovieView-action {
     border: none;
@@ -17,6 +14,9 @@
     margin: 0.2rem 0;
 }
 
+.MovieView-content {
+    min-height: 400px;
+}
 .MovieView-content--loading {
     pointer-events: none;
     color: transparent;

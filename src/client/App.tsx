@@ -20,9 +20,7 @@ const App = () => {
       <div id="App">
         <h1 className="App-title">{title}</h1>
         <hr className="App-title-hr" />
-        <div>
-          <MovieView />
-        </div>
+        <MovieView />
         <hr className="App-footer-hr" />
         <footer className="App-footer">
           <p>
