@@ -57,7 +57,7 @@ export const stateReducer: Reducer<State, Action> = (
         localStorage.removeItem(PREFERENCES_STORAGE_KEY);
         // TODO sentry report
       }
-      return {...state};
+      return {...state, preferences: []};
     case 'add_preference': {
       const newPrefs = [
         ...(state.preferences || []).filter((p: ScoringPreference) => {
