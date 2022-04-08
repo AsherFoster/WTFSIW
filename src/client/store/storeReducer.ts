@@ -5,13 +5,14 @@ import type {
 } from '../../shared/clientapi/Response';
 import type {ScoringPreference} from '../../shared/clientapi/Scoring';
 import {assertNever} from '../../shared/util';
+import {ENVIRONMENT} from '../../shared/config';
 
 const PREFERENCES_STORAGE_KEY = 'wtfsiw_preferences';
 
 export interface State {
   loading: boolean;
   movieResp: ScoredMovieResponse | ErrorResponse | null;
-  preferences: ScoringPreference[];
+  preferences: ScoringPreference[] | null;
 }
 
 interface AddPreferenceAction {
@@ -40,6 +41,7 @@ export const stateReducer: Reducer<State, Action> = (
   state: State,
   action: Action | Record<string, never> = {}
 ) => {
+  if (ENVIRONMENT === 'development') console.log('[STORE]', state, action);
   switch (action.type) {
     case 'load_preferences':
       try {
@@ -58,7 +60,7 @@ export const stateReducer: Reducer<State, Action> = (
       return {...state};
     case 'add_preference': {
       const newPrefs = [
-        ...state.preferences.filter((p: ScoringPreference) => {
+        ...(state.preferences || []).filter((p: ScoringPreference) => {
           // Remove preferences for the same person
           if (p.type === 'person') {
             return (

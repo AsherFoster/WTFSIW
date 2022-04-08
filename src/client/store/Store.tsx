@@ -4,7 +4,7 @@ import {State, stateReducer, StoreDispatch} from './storeReducer';
 export const initialState: State = {
   loading: true,
   movieResp: null,
-  preferences: [],
+  preferences: null,
 };
 
 type StoreContextValue = [State, StoreDispatch];

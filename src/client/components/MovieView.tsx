@@ -28,51 +28,50 @@ const MovieView = () => {
   const dispatch = useDispatch();
   const store = useStore();
   const {loading, movieResp, preferences} = store;
+  const loadingCls = loading ? 'MovieView-content--loading' : '';
+
+  function reloadMovie() {
+    // IDK how async reducers are supposed to work. This'll do for now :shrug:
+    dispatch({type: 'start_loading'});
+    getMovie(preferences ?? []).then((r) =>
+      dispatch({type: 'movie_loaded', payload: r})
+    );
+  }
 
   useEffect(() => {
     dispatch({type: 'load_preferences'});
   }, []);
 
   useEffect(() => {
-    getMovie(preferences).then((r) =>
-      dispatch({type: 'movie_loaded', payload: r})
-    );
+    if (preferences) reloadMovie();
   }, [preferences]);
 
-  function reloadMovie() {
-    // IDK how async reducers are supposed to work. This'll do for now :shrug:
-    dispatch({type: 'start_loading'});
-    getMovie(preferences).then((r) =>
-      dispatch({type: 'movie_loaded', payload: r})
-    );
-  }
-
-  if (loading) {
+  if (loading && !movieResp) {
     return (
-      <>
-        <div className="MovieView-placeholder" />
-      </>
+      <div className={'MovieView-placeholder ' + loadingCls}>
+        <h2>Browsing the archives...</h2>
+      </div>
     );
   }
 
   if (!movieResp || 'error' in movieResp) {
     return (
-      <>
+      <div className={loadingCls}>
         <h2>Fuck. Something went wrong.</h2>
-        <button onClick={() => fetchMovie(store, dispatch)}>Try again</button>
+        <button onClick={reloadMovie}>Try again</button>
         {movieResp && (
           <p>
             {movieResp.message} ({movieResp.error})
           </p>
         )}
-      </>
+      </div>
     );
   }
 
   const {movie, actions} = movieResp;
 
   return (
-    <>
+    <div className={loadingCls}>
       <h2>{movie.title}</h2>
       <p>
         {movie.overview} -&nbsp;
@@ -97,7 +96,7 @@ const MovieView = () => {
           </button>
         </li>
       </ul>
-    </>
+    </div>
   );
 };
 
