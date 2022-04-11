@@ -26,8 +26,3 @@ export interface Movie {
   genres: number[];
   credits: Credit[];
 }
-
-interface Root {
-  movies: Movie[];
-  genres: Genre[];
-}

@@ -1,11 +1,11 @@
 import type {Genre, Movie} from '../shared/database';
 import {sample} from '../shared/util';
 
-interface KV {
-  movies: number[];
-  'movie/:id': Movie;
-  genres: number[];
-}
+// KV structure
+// version - number representing the schema version
+// movie/:id - details of a single movie
+// movies - list of all movie IDs
+// genres - list of all genres (name & id dicts)
 
 type StorageKey =
   | 'movies'
