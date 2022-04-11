@@ -7,7 +7,7 @@ jobs:
     name: "Install"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3
+      - uses: actions/checkout@v3
 
       # Cache npm's cache for faster installs
       - uses: actions/cache@v3
