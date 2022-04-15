@@ -1,6 +1,6 @@
 # Compiled outputs
 dist
-functions
+/functions
 static/js
 
 # Config stores
