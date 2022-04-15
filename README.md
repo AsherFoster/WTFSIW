@@ -16,6 +16,11 @@ Do you want to watch a movie? Do you find normal recommendation sites too polite
 - Making the most of a common search term with good SEO
 - Privacy-friendly analytics to feed my curiosity
 
+### Still to do:
+- Write unit tests (ugh)
+- Automate dependency updates
+- SEO
+
 ## Usage
 - Clone, then `npm install`
 - Build using `npm run build` (or `npm run build watch`)

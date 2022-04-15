@@ -23,7 +23,7 @@ export const INITIAL_SAMPLE_SIZE = 100;
 export const SUGGESTED_ACTION_COUNT = 3;
 
 // Scraper params
-export const MOVIE_DATASET_SIZE = ENVIRONMENT === 'production' ? 5000 : 10;
+export const MOVIE_DATASET_SIZE = ENVIRONMENT === 'production' ? 900 : 10;
 export const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 // Scraper/Cloudflare KV params
