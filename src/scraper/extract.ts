@@ -53,10 +53,12 @@ function toCredits(cast: Cast[], crew: Crew[]): Credit[] {
   return cast.map(castToCredit).concat(crew.map(crewToCredit));
 }
 
-function toMovie(movie: Required<TMDBMovie>, credits: Credit[]): Movie {
+function toMovie(movie: Required<TMDBMovie>, credits: Credit[]): Movie | null {
   if (!movie.title || !movie.overview) {
-    console.error(movie);
-    throw new Error('Movie is missing title or overview');
+    console.log(
+      `Skipping movie ${movie.id} as it's missing either a title or overview`
+    );
+    return null;
   }
 
   return {
@@ -88,7 +90,8 @@ async function extract(): Promise<AllTheThings> {
   for (const movie of tmdbMovies) {
     const {cast, crew} = await getMovieCredits(movie.id!);
     const credits = toCredits(cast, crew);
-    movies.push(toMovie(movie as Required<TMDBMovie>, credits));
+    const transformedMovie = toMovie(movie as Required<TMDBMovie>, credits);
+    if (transformedMovie) movies.push(transformedMovie);
   }
 
   return {
