@@ -1,7 +1,8 @@
 # Compiled outputs
-dist
+/dist
 /functions
-static/js
+/test
+/static/js
 
 # Config stores
 .idea

@@ -43,11 +43,10 @@ build({
 });
 
 // Compile the scraper script into a simple script
-// TODO why did I switch this to CJS again? Can we go back to ESM?
 build({
   entryPoints: ['src/scraper/index.ts'],
-  outfile: 'dist/scraper.cjs',
-  // format: 'esm',
+  outfile: 'dist/scraper.js',
+  format: 'esm',
   platform: 'node',
   bundle: true,
   external: ['miniflare'],
@@ -64,6 +63,21 @@ build({
   outdir: 'functions',
   format: 'esm',
   bundle: true,
+  sourcemap: true,
+  target: 'node16',
+  watch,
+  define,
+});
+
+// Compile the src/test tree into the base /test dir used by Node TAP
+build({
+  entryPoints: (await walkDir('src/test')).filter(f => f.endsWith('.ts')),
+  outbase: 'src/test',
+  outdir: 'test',
+  format: 'esm',
+  platform: 'node',
+  bundle: true,
+  external: ['tap'],
   sourcemap: true,
   target: 'node16',
   watch,
