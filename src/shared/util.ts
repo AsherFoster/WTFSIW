@@ -25,3 +25,7 @@ export function sample<T>(src: T[], n: number): T[] {
 
   return sampled;
 }
+
+export function pick<T>(src: T[]): T {
+  return src[Math.floor(Math.random() * src.length)];
+}

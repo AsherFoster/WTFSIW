@@ -39,7 +39,7 @@ const Movie = ({
                 dispatch({type: 'add_preference', payload: action})
               }
             >
-              {action.name}
+              {action.label}
             </button>
           </li>
         ))}

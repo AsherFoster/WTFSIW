@@ -26,7 +26,7 @@ export interface ClientMovie {
   genres: Genre[];
 }
 
-export type ScoringAction = ScoringPreference & {name: string};
+export type ScoringAction = ScoringPreference & {label: string};
 export interface ScoredMovieResponse {
   movie: ClientMovie;
   actions: ScoringAction[];
