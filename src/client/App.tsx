@@ -27,7 +27,8 @@ const App = () => {
             <a href="https://github.com/asherfoster/wtfsiw">Github</a> -{' '}
             <a href="https://asherfoster.com/things/whatthefuckshouldiwatch">
               About
-            </a>
+            </a>{' '}
+            - <a href="https://simpleanalytics.com/wtfsiw.xyz">Stats</a>
           </p>
           <p>
             Made by <a href="https://asherfoster.com">Asher Foster</a> for no
