@@ -49,7 +49,7 @@ build({
   format: 'esm',
   platform: 'node',
   bundle: true,
-  external: ['miniflare'],
+  external: ['miniflare', '@sentry/node'],
   sourcemap: true,
   target: 'node16',
   watch,
