@@ -12,6 +12,7 @@
     cursor: pointer;
     padding: 0.2rem 0;
     margin: 0.2rem 0;
+    text-align: left;
 }
 
 .MovieView-content {
