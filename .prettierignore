@@ -1,4 +1,5 @@
 dist
-static
+/public
+/functions
 node_modules
 .idea

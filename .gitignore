@@ -2,7 +2,7 @@
 /dist
 /functions
 /test
-/static/js
+/public
 
 # Config stores
 .idea

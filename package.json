@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "dev": "wrangler pages dev --kv storage --proxy 3000 -- serve static",
+    "dev": "wrangler pages dev --kv storage --proxy 3000 -- serve public",
     "format": "prettier --write '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
     "lint": "eslint src --max-warnings=0 && prettier --check '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
     "scraper": "node dist/scraper.js",
@@ -40,6 +40,7 @@
     "wrangler": "^0.0.24"
   },
   "dependencies": {
+    "@chialab/esbuild-plugin-html": "^0.15.14",
     "@sentry/browser": "^6.17.9",
     "@sentry/node": "^6.19.6",
     "@sentry/react": "^6.19.6",

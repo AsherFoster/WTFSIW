@@ -1,4 +1,5 @@
 import {build} from 'esbuild';
+import htmlPlugin from '@chialab/esbuild-plugin-html';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -31,13 +32,22 @@ const define = {
 
 // Compile the client script into something browser-ready
 build({
-  entryPoints: ['src/client/index.tsx'],
-  outdir: 'static/js',
+  entryPoints: ['src/client/index.html'],
+  outdir: 'public',
+  assetNames: 'static/[name]-[hash]',
+  chunkNames: 'static/[name]-[hash]',
+  // entryNames:
+  //   process.env.NODE_ENV === 'production' ? '[name]-[hash]' : undefined,
   format: 'esm',
   bundle: true,
   minify: true,
   sourcemap: true,
-  target: 'firefox95',
+  plugins: [
+    htmlPlugin({
+      scriptsTarget: 'firefox70',
+      modulesTarget: 'firefox95',
+    }),
+  ],
   watch,
   define,
 });
