@@ -1,44 +1,51 @@
 {
-  "name": "wtfsiw",
-  "version": "1.0.0",
-  "description": "What the fuck should you watch?",
-  "main": "dist/server.js",
+  "name": "@asherfoster/wtfsiw",
+  "version": "2.0.0",
+  "description": "Find some fucking movies",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "tsc && gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build.js",
+    "dev": "wrangler pages dev --kv storage --proxy 3000 -- serve static",
+    "format": "prettier --write '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint": "eslint src --max-warnings=0 && prettier --check '*.{json,js}' 'src/**/*.{js,jsx,ts,tsx}'",
+    "scraper": "node dist/scraper.js",
+    "test": "tap test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/asherfoster/wftsiw.git"
+    "url": "git+https://github.com/AsherFoster/WTFSIW.git"
   },
   "author": "Asher Foster <me@asherfoster.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/asherfoster/wftsiw/issues"
+    "url": "https://github.com/AsherFoster/WTFSIW/issues"
   },
-  "homepage": "https://github.com/asherfoster/wftsiw#readme",
-  "dependencies": {
-    "@sentry/node": "^5.11.1",
-    "body-parser": "^1.19.0",
-    "bottleneck": "^2.19.5",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "sqlite": "^3.0.3"
-  },
+  "homepage": "https://github.com/AsherFoster/WTFSIW#readme",
   "devDependencies": {
-    "@babel/core": "^7.7.5",
-    "@babel/preset-env": "^7.7.6",
-    "@types/cors": "^2.8.6",
-    "@types/express": "^4.17.2",
-    "@types/node": "^12.12.17",
-    "babel-preset-minify": "^0.5.1",
-    "del": "^5.1.0",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-htmlmin": "^5.0.1",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.3",
-    "vrsource-tslint-rules": "^6.0.0"
+    "@asherfoster/eslint-config": "^3.0.0",
+    "@cloudflare/workers-types": "^3.4.0",
+    "@types/node": "^16.11.26",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.13",
+    "@types/service-worker-mock": "^2.0.1",
+    "@types/tap": "^15.0.6",
+    "esbuild": "^0.14.25",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.5.0",
+    "miniflare": "^2.4.0",
+    "moviedb-promise": "^3.1.13",
+    "prettier": "^2.5.1",
+    "tap": "^16.0.1",
+    "typescript": "^4.5.5",
+    "wrangler": "^0.0.24"
+  },
+  "dependencies": {
+    "@sentry/browser": "^6.17.9",
+    "node-fetch": "^3.2.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "toucan-js": "^2.5.0",
+    "zod": "^3.13.4"
   }
 }

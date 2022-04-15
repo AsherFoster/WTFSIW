@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -11,75 +11,18 @@
   <meta name="og:image" content="https://wtfsiw.xyz/static/icon_big.png">
   <meta name="twitter:card" content="summary"/>
   <meta name="twitter:site" content="asherfoster"/>
-  <link href="//fonts.googleapis.com/css?family=Karla:400,400i,700,700i&display=swap" rel="stylesheet">
-  <link href="/static/styles.css" rel="stylesheet">
-  <script
-          src="https://browser.sentry-cdn.com/5.11.1/bundle.min.js"
-          integrity="sha384-r7/ZcDRYpWjCNXLUKk3iuyyyEcDJ+o+3M5CqXP5GUGODYbolXewNHAZLYSJ3ZHcV"
-          crossorigin="anonymous"></script>
-  <script>
-    Sentry.init({ dsn: 'https://d86a405cbf3242aaaac3a3ff2416d04a@sentry.io/1470209' });
-    // Load fetch polyfill synchronously if required (To not affect performance on evergreen browsers)
-    if (!window.fetch) document.write('<script src="static/fetch_polyfill.js"><\/script>');
-    if (!window.Promise) document.write('<script src="//cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>');
-    (function(a,b,c){var d=a.history,e=document,f=navigator||{},g=localStorage,
-            h=encodeURIComponent,i=d.pushState,k=function(){return Math.random().toString(36)},
-            l=function(){return g.cid||(g.cid=k()),g.cid},m=function(r){var s=[];for(var t in r)
-              r.hasOwnProperty(t)&&void 0!==r[t]&&s.push(h(t)+"="+h(r[t]));return s.join("&")},
-            n=function(r,s,t,u,v,w,x){var z="https://www.google-analytics.com/collect",
-                    A=m({v:"1",ds:"web",aip:c.anonymizeIp?1:void 0,tid:b,cid:l(),t:r||"pageview",
-                      sd:c.colorDepth&&screen.colorDepth?screen.colorDepth+"-bits":void 0,dr:e.referrer||
-                              void 0,dt:e.title,dl:e.location.origin+e.location.pathname+e.location.search,ul:c.language?
-                              (f.language||"").toLowerCase():void 0,de:c.characterSet?e.characterSet:void 0,
-                      sr:c.screenSize?(a.screen||{}).width+"x"+(a.screen||{}).height:void 0,vp:c.screenSize&&
-                      a.visualViewport?(a.visualViewport||{}).width+"x"+(a.visualViewport||{}).height:void 0,
-                      ec:s||void 0,ea:t||void 0,el:u||void 0,ev:v||void 0,exd:w||void 0,exf:"undefined"!=typeof x&&
-                      !1==!!x?0:void 0});if(f.sendBeacon)f.sendBeacon(z,A);else{var y=new XMLHttpRequest;
-              y.open("POST",z,!0),y.send(A)}};d.pushState=function(r){return"function"==typeof d.onpushstate&&
-    d.onpushstate({state:r}),setTimeout(n,c.delay||10),i.apply(d,arguments)},n(),
-            a.ma={trackEvent:function o(r,s,t,u){return n("event",r,s,t,u)},
-              trackException:function q(r,s){return n("exception",null,null,null,null,r,s)}}})
-    (window,"UA-53155844-6",{anonymizeIp:true,colorDepth:true,characterSet:true,screenSize:true,language:true});
-  </script>
-  <script src="//cdn.jsdelivr.net/npm/vue@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="js/index.css" rel="stylesheet">
 </head>
 <body>
-<div id="app" class="wrapper" style="display: none">
-  <h1>{{title}}</h1>
-  <hr class="top-hr">
-  <div v-if="!error && movie" class="suggestion">
-    <h2>{{movie.title | conditionalFilter}}</h2>
-    <p class="description">
-      {{movie.overview | trim(400)}} -&nbsp;<a :href="movie.link">View on TMDb</a>
-    </p>
-    <div class="actions">
-      <a href="#" @click="savePreference(action); reload()" v-for="action of movie.actions">{{action.text}}</a>
-      <br>
-      <a href="#" @click="reload()">Just give me another {{fuck}}ing movie!</a>
-    </div>
-    <footer class="footer">
-      <p class="reasoning" v-if="movie.reasonText">Suggested because you {{movie.reasonText}}</p>
-      <hr class="footer-hr">
-      <p>
-        <a href="//github.com/asherfoster/wtfsiw">Github</a> -
-        <a href="//asherfoster.com/things/whatthefuckshouldiwatch">About</a>
-        <span v-if="!flags.safe">
-          - <a href="?safe=true">Stop fucking swearing</a>
-        </span>
-        <br>
-        Made by Asher Foster with a {{fuck}} ton of luck.
-        This product uses the TMDb API but is not endorsed or certified by TMDb.
-      </p>
-    </footer>
-  </div>
-  <div v-else-if="error">
-    <h2>{{error.title}}</h2>
-    <p>{{error.message}}</p>
-  </div>
-  <div v-else-if="!movie">
-    <h2>Loading...</h2>
-  </div>
-</div>
-<script src="/static/app.js"></script>
+  <div id="root"></div>
+  <script type="module" src="js/index.js"></script>
+
+  <!-- SimpleAnalytics tracker -->
+  <!-- Curious? https://simpleanalytics.com/wtfsiw.xyz -->
+  <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
 </body>
 </html>

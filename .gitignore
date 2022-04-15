@@ -1,7 +1,12 @@
+# Compiled outputs
+/dist
+/functions
+/test
+/static/js
+
+# Config stores
 .idea
-dist
-data
-static_out
+.mf
 
 # Created by .ignore support plugin (hsz.mobi)
 ### macOS template

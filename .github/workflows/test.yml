@@ -1,0 +1,72 @@
+name: Test
+on:
+  push:
+
+jobs:
+  install:
+    name: "Install"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Cache npm's cache for faster installs
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - run: npm install
+
+      # Cache the result of the install
+      - uses: actions/cache@v2
+        id: cache-project
+        with:
+          path: ./*
+          key: ${{ github.sha }}-installed
+
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      # Restore the project
+      - uses: actions/cache@v2
+        id: restore-project
+        with:
+          path: ./*
+          key: ${{ github.sha }}-installed
+
+      - run: npm run lint
+
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      # Restore the project
+      - uses: actions/cache@v2
+        id: restore-project
+        with:
+          path: ./*
+          key: ${{ github.sha }}-installed
+
+      - run: npm run build
+      - run: npm run test
+
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      # Restore the project
+      - uses: actions/cache@v2
+        id: restore-project
+        with:
+          path: ./*
+          key: ${{ github.sha }}-installed
+
+      - run: npm run build

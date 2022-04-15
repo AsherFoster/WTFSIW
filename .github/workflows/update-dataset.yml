@@ -1,0 +1,30 @@
+name: Refresh WTFSIW Dataset
+on:
+  schedule:
+    - cron: 12 * * * 1
+  workflow_dispatch:
+
+jobs:
+  update-dataset:
+    name: "Update Dataset"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - run: npm install
+      - run: npm run build
+        env:
+          NODE_ENV: production
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+
+      # Run the scraper
+      - name: Execute Scraper script
+        run: npm run scraper

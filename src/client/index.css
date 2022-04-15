@@ -1,0 +1,21 @@
+:root {
+    --background: #FFF;
+    --color: #000;
+    --page-width: 720px;
+    font-family: "Karla", "Arial", sans-serif;
+}
+@media screen and (prefers-color-scheme: dark) {
+    :root {
+        --background: #111;
+        --color: #EEE;
+    }
+}
+html {
+    background: var(--background);
+    color: var(--color);
+}
+
+
+a {
+    color: inherit;
+}

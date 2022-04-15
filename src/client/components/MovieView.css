@@ -1,0 +1,37 @@
+.MovieView-actions {
+    list-style-type: none;
+    padding: 0;
+}
+
+.MovieView-action {
+    border: none;
+    font: inherit;
+    background: none;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.2rem 0;
+    margin: 0.2rem 0;
+}
+
+.MovieView-content {
+    min-height: 400px;
+}
+.MovieView-content--loading {
+    pointer-events: none;
+    color: transparent;
+    background: linear-gradient(90deg, #DDD 0%, #666 50%, #DDD 100%) repeat-x;
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    animation: shimmer-loader 1.5s linear infinite;
+}
+
+@keyframes shimmer-loader {
+    from {
+        background-position-x: 100%;
+    }
+    to {
+        background-position-x: -100%;
+    }
+}
