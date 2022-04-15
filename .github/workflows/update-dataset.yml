@@ -24,6 +24,7 @@ jobs:
           NODE_ENV: production
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       # Run the scraper
       - name: Execute Scraper script

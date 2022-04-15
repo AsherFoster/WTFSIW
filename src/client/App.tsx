@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {ErrorBoundary, withProfiler} from '@sentry/react';
 import {Store} from './store/Store';
 import MovieView from './components/MovieView';
 import './App.css';
@@ -20,7 +21,9 @@ const App = () => {
       <div id="App">
         <h1 className="App-title">{title}</h1>
         <hr className="App-title-hr" />
-        <MovieView />
+        <ErrorBoundary fallback={<p>Well shit, we really fucked up.</p>}>
+          <MovieView />
+        </ErrorBoundary>
         <hr className="App-footer-hr" />
         <footer className="App-footer">
           <p>
@@ -41,4 +44,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default withProfiler(App);
