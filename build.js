@@ -71,7 +71,7 @@ build({
 
 // Compile the src/test tree into the base /test dir used by Node TAP
 build({
-  entryPoints: (await walkDir('src/test')).filter(f => f.endsWith('.ts')),
+  entryPoints: (await walkDir('src/test')).filter((f) => f.endsWith('.ts')),
   outbase: 'src/test',
   outdir: 'test',
   format: 'esm',
