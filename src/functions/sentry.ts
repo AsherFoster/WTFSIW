@@ -1,5 +1,5 @@
 import Toucan from 'toucan-js';
-import {SENTRY_DSN} from '../shared/config';
+import {ENVIRONMENT, SENTRY_DSN, VERSION} from '../shared/config';
 import {WTFSIWContext} from './types';
 
 export function initSentry(request: Request, context: WTFSIWContext): Toucan {
@@ -22,6 +22,8 @@ export function initSentry(request: Request, context: WTFSIWContext): Toucan {
     rewriteFrames: {
       root: '/',
     },
+    environment: ENVIRONMENT,
+    release: VERSION,
   });
 
   const colo = request.cf && request.cf.colo ? request.cf.colo : 'UNKNOWN';

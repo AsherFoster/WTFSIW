@@ -20,6 +20,9 @@ Do you want to watch a movie? Do you find normal recommendation sites too polite
 - Write unit tests (ugh)
 - Automate dependency updates
 - SEO
+- Sentry sourcemaps
+- Client/server perf tracking
+- Sentry deploys
 
 ## Usage
 - Clone, then `npm install`

@@ -22,11 +22,14 @@ const walkDir = async (dir) => {
 const watch = process.argv.includes('watch');
 
 const define = {
-  'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+  'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN),
   'process.env.TMDB_API_KEY': JSON.stringify(process.env.TMDB_API_KEY),
   'process.env.CLOUDFLARE_API_KEY': JSON.stringify(
     process.env.CLOUDFLARE_API_KEY
+  ),
+  'process.env.VERSION': JSON.stringify(
+    process.env.CF_PAGES_COMMIT_SHA || process.env.GITHUB_SHA || 'HEAD'
   ),
 };
 

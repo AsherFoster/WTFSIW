@@ -5,6 +5,7 @@ declare const process: {
     SENTRY_DSN?: string;
     TMDB_API_KEY?: string;
     CLOUDFLARE_API_KEY?: string;
+    VERSION: string;
   };
 };
 const allowedEnvironments = ['development', 'production', 'test'] as const;
@@ -17,6 +18,7 @@ if (!allowedEnvironments.includes(process.env.NODE_ENV as any)) {
 export const ENVIRONMENT = process.env.NODE_ENV as Environment;
 
 export const SENTRY_DSN = process.env.SENTRY_DSN;
+export const VERSION = process.env.VERSION;
 
 // Scoring algorithm parameters
 export const INITIAL_SAMPLE_SIZE = 100;
