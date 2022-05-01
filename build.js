@@ -21,8 +21,14 @@ const walkDir = async (dir) => {
 
 const watch = process.argv.includes('watch');
 
+const validEnvironents = ['development', 'production', 'test'];
+const env = process.env.NODE_ENV || 'development';
+if (!validEnvironents.includes(process.env.NODE_ENV)) {
+  throw new Error('Invalid Environment');
+}
+
 const define = {
-  'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  'process.env.NODE_ENV': JSON.stringify(env),
   'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN),
   'process.env.TMDB_API_KEY': JSON.stringify(process.env.TMDB_API_KEY),
   'process.env.CLOUDFLARE_API_KEY': JSON.stringify(
@@ -31,6 +37,7 @@ const define = {
   'process.env.VERSION': JSON.stringify(
     process.env.CF_PAGES_COMMIT_SHA || process.env.GITHUB_SHA || 'HEAD'
   ),
+  __SENTRY_DEBUG__: JSON.stringify(process.env.NODE_ENV !== 'production'),
 };
 
 // Compile the client script into something browser-ready

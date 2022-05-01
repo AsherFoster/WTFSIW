@@ -1,21 +1,15 @@
 declare const process: {
   env: {
     // Based off of constants provided in build.js
-    NODE_ENV?: string;
+    NODE_ENV: Environment;
     SENTRY_DSN?: string;
     TMDB_API_KEY?: string;
     CLOUDFLARE_API_KEY?: string;
     VERSION: string;
   };
 };
-const allowedEnvironments = ['development', 'production', 'test'] as const;
 type Environment = 'development' | 'production' | 'test';
-if (!allowedEnvironments.includes(process.env.NODE_ENV as any)) {
-  throw new Error(
-    `Environment must be one of ${allowedEnvironments.join(', ')}`
-  );
-}
-export const ENVIRONMENT = process.env.NODE_ENV as Environment;
+export const ENVIRONMENT = process.env.NODE_ENV;
 
 export const SENTRY_DSN = process.env.SENTRY_DSN;
 export const VERSION = process.env.VERSION;
