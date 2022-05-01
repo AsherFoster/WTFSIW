@@ -55,6 +55,8 @@ jobs:
           key: ${{ github.sha }}-installed
 
       - run: npm run build
+        env:
+          NODE_ENV: test
       - run: npm run test
 
   build:
@@ -70,3 +72,5 @@ jobs:
           key: ${{ github.sha }}-installed
 
       - run: npm run build
+        env:
+          NODE_ENV: test
