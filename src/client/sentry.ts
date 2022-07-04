@@ -1,8 +1,8 @@
-import * as Sentry from '@sentry/react';
+import {init} from '@sentry/react';
 import {ENVIRONMENT, SENTRY_DSN, VERSION} from '../shared/config';
 import {BrowserTracing} from '@sentry/tracing';
 
-Sentry.init({
+init({
   dsn: SENTRY_DSN,
   integrations: [new BrowserTracing()],
   tracesSampleRate: 1.0,
