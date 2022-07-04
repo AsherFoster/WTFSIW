@@ -40,7 +40,7 @@
     "wrangler": "^2.0.15"
   },
   "dependencies": {
-    "@chialab/esbuild-plugin-html": "^0.16.1",
+    "@chialab/esbuild-plugin-html": "^0.15.37",
     "@sentry/node": "^7.4.1",
     "@sentry/react": "^7.4.1",
     "@sentry/tracing": "^7.4.1",
